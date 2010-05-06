@@ -316,6 +316,8 @@ var xwitter = function(spec) {
 	};
 
 	var _flee = function() {
+		_box.style.display = 'none';
+
 		_statuses.length = 0;
 
 		var nodes = [], node = _box.firstChild;
@@ -334,6 +336,8 @@ var xwitter = function(spec) {
 		range.selectNodeContents(_box);
 		range.deleteContents();
 		range.detach(); */
+
+		_box.style.display = '';
 	};
 
 	var _save = function(xml) {
