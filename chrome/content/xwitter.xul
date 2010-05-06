@@ -7,6 +7,7 @@
   <xul:box />
   <xul:script type="application/x-javascript" src="chrome://global/content/nsUserSettings.js" />
   <xul:script type="application/x-javascript" src="chrome://xwitter/content/io.js" />
+  <xul:script type="application/x-javascript" src="chrome://xwitter/content/jsdeferred.js" />
   <xul:script type="application/x-javascript" src="chrome://xwitter/content/common.js" />
   <xul:script type="application/x-javascript" src="chrome://xwitter/content/xwitter.js" />
   <xul:script type="application/x-javascript">xwitter()</xul:script>

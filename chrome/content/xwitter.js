@@ -317,9 +317,19 @@ var xwitter = function(spec) {
 
 	var _flee = function() {
 		_statuses.length = 0;
-		while (_box.hasChildNodes) {
-			_box.removeChild(_box.firstChild);
-		}
+
+		var nodes = [], node = _box.firstChild;
+		do {
+			nodes.push(node);
+		} while (node = node.nextSibling);
+
+		Deferred.loop(nodes.length, function(i) {
+			_box.removeChild(nodes[i]);
+		}).
+		  error(function(e) {
+			  dump(e);
+		  });
+
 		/* var range = document.createRange();
 		range.selectNodeContents(_box);
 		range.deleteContents();
