@@ -323,7 +323,21 @@ var xwitter = function(spec) {
 			nodes.push(node);
 		} while (node = node.nextSibling);
 
-		Deferred.loop(nodes.length, function(i) {
+		function aloop (n, f) {
+			var i = 0, end = {}, ret = null;
+			return Deferred.next(function () {
+				var t = (new Date()).getTime();
+			  divide: {
+				  do {
+					  if (i >= n) break divide;
+					  ret = f(i++);
+				  } while ((new Date()).getTime() - t < 20);
+				  return Deferred.call(arguments.callee);
+			  }
+			});
+		}
+
+		aloop(nodes.length, function(i) {
 			_box.removeChild(nodes[i]);
 		}).
 		  error(function(e) {
