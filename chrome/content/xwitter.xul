@@ -3,8 +3,8 @@
 <?xml-stylesheet type="text/css" href="chrome://xwitter/skin/xwitter.css"?>
 <xul:window title="xwitter"
   xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-  <xul:textbox maxlength="140" />
-  <xul:box />
+  <xul:textbox id="status" />
+  <xul:box id="statuses" />
   <xul:script type="application/x-javascript" src="chrome://global/content/nsUserSettings.js" />
   <xul:script type="application/x-javascript" src="chrome://xwitter/content/io.js" />
   <xul:script type="application/x-javascript" src="chrome://xwitter/content/jsdeferred.js" />

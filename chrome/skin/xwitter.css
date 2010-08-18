@@ -7,7 +7,7 @@
   padding: 0;
 }
 
-xul|box {
+xul|box#statuses {
   color: #d0d0d0;
   background-color: #00283c;
   width: 480px;
@@ -17,7 +17,7 @@ xul|box {
   -moz-box-orient: vertical;
 }
 
-xul|textbox,
+xul|textbox#status,
 body {
   font-family: 'M+2VM+IPAG circle Regular', sans-serif;
   font-size: 13px;
@@ -36,6 +36,13 @@ h1 {
   font-weight: normal;
   font-size: 100%;
   display: inline;
+}
+
+header {
+  display: inline-block;
+  width: 90%;
+  height: 1em;
+  overflow: hidden;
 }
 
 header::before {

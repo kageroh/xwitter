@@ -23,17 +23,15 @@
 	  <xsl:if test="user/protected = 'true'">
 		<xsl:attribute name="class">protected</xsl:attribute>
 	  </xsl:if>
+	  <img src="{regexp:replace(user/profile_image_url, '^(.+_)normal(\..+)$', '', '$1mini$2')}" alt="" />
 	  <header>
-		<img src="{regexp:replace(user/profile_image_url, '^(.+_)normal(\..+)$', '', '$1mini$2')}" alt="" />
 		<h1><xsl:value-of select="user/screen_name" /></h1>
-	  </header>
-	  <footer>
 		<time><xsl:value-of select="created_at" /></time>
 		<xsl:text>via </xsl:text>
 		<em class="source">
 		  <xsl:value-of select="regexp:replace(source, '^&lt;a href=&quot;.+&quot; rel=&quot;nofollow&quot;&gt;(.+)&lt;/a&gt;$', '', '$1')" />
 		</em>
-	  </footer>
+	  </header>
 	  <p>
 		<xsl:if test="favorited = 'true'">
 		  <xsl:attribute name="class">favorited</xsl:attribute>
