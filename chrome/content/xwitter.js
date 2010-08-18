@@ -1,9 +1,9 @@
-var xwitter = function(spec) {
+﻿var xwitter = function(spec) {
 	var that = {};
 	spec = spec || {};
 
 	var _name = 'xwitter';
-	var _api  = spec.api || 150;
+	var _api  = spec.api || 75;
 
 	var _tid; // setInterval ID
 	var _statuses = [];
@@ -169,7 +169,8 @@ var xwitter = function(spec) {
 			created_at.textContent = _dateParse(created_at.textContent);
 
 			var text = $s(_query.text, element);
-			text.textContent = _refChar(text.textContent);
+			text.textContent = _refChar(text.textContent).
+			  replace(/([\s\S])(\1{3})\1+/g, '$1$2');
 
 			text.innerHTML = text.innerHTML.
 			  replace(/(@)(\w{1,20})/g, '$1<em class="account">$2</em>').
