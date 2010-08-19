@@ -18,7 +18,7 @@
 	};
 
 	var _cmds = {
-	  api        : 'api',
+	  rate       : 'api',
 	  destroy    : 'del',
 	  fav        : 'fav',
 	  findUrl    : 'url',
@@ -234,7 +234,7 @@
 			  case _cmds.user    : _changeMode ( _modes.user,    text ); return true;
 			  case _cmds.list    : _changeMode ( _modes.list,    text ); return true;
 			  case _cmds.test    : _changeMode ( _modes.test          ); return true;
-			  case _cmds.api     : _rate(); return true;
+			  case _cmds.rate    : _rate(); return true;
 			  case _cmds.flee    : _flee(); return true;
 			}
 		}
