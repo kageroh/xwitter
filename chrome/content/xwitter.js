@@ -91,11 +91,11 @@
 			switch (mode) {
 			  case _modes.tl:
 				attrTitle.nodeValue = _name;
-				_modeUrl = 'https://twitter.com/statuses/friends_timeline.xml';
+				_modeUrl = 'https://api.twitter.com/1/statuses/friends_timeline.xml';
 				return;
 			  case _modes.mention:
 				attrTitle.nodeValue = [_name, 'mention'].join(' - ');
-				_modeUrl = 'https://twitter.com/statuses/mentions.xml';
+				_modeUrl = 'https://api.twitter.com/1/statuses/mentions.xml';
 				return;
 			  case _modes.test:
 				attrTitle.nodeValue = [_name, 'test'].join(' - ');
@@ -109,7 +109,7 @@
 			attrTitle.nodeValue = [_name, param].join(' - ');
 			switch (mode) {
 			  case _modes.user:
-				_modeUrl = 'https://twitter.com/statuses/user_timeline/' + param + '.xml';
+				_modeUrl = 'https://api.twitter.com/1/statuses/user_timeline/' + param + '.xml';
 				return;
 			  case _modes.list:
 				var arr = param.split('/');
@@ -571,17 +571,17 @@
 		_changeMode(_modes.tl, param);
 		test.ok('_changeMode 1', _mode, _modes.tl);
 		test.ok('_changeMode 2', attrTitle.nodeValue, _name);
-		test.ok('_changeMode 3', _modeUrl, 'https://twitter.com/statuses/friends_timeline.xml');
+		test.ok('_changeMode 3', _modeUrl, 'https://api.twitter.com/1/statuses/friends_timeline.xml');
 
 		_changeMode(_modes.mention, param);
 		test.ok('_changeMode 4', _mode, _modes.mention);
 		test.ok('_changeMode 5', attrTitle.nodeValue, [_name, 'mention'].join(' - '));
-		test.ok('_changeMode 6', _modeUrl, 'https://twitter.com/statuses/mentions.xml');
+		test.ok('_changeMode 6', _modeUrl, 'https://api.twitter.com/1/statuses/mentions.xml');
 
 		_changeMode(_modes.user, param);
 		test.ok('_changeMode 7', _mode, _modes.user);
 		test.ok('_changeMode 8', attrTitle.nodeValue, [_name, param].join(' - '));
-		test.ok('_changeMode 9', _modeUrl, 'https://twitter.com/statuses/user_timeline/' + param + '.xml');
+		test.ok('_changeMode 9', _modeUrl, 'https://api.twitter.com/1/statuses/user_timeline/' + param + '.xml');
 
 		_changeMode(_modes.list, param);
 		test.ok('_changeMode a', _mode, _modes.list);
