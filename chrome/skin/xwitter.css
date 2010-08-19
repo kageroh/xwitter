@@ -38,10 +38,9 @@ h1 {
   display: inline;
 }
 
-header {
-  display: inline-block;
-  width: 90%;
-  height: 1em;
+div.meta {
+  white-space: nowrap;
+  width: 420px;
   overflow: hidden;
 }
 
@@ -121,6 +120,10 @@ em.source::before {
 
 em.source::after {
   content: close-quote;
+}
+
+em.weeded {
+  display: none;
 }
 
 img {

@@ -1,7 +1,8 @@
 // pref('network.proxy.type', 2);
 // pref('network.proxy.autoconfig_url', 'http://example.org/proxy.pac');
+// pref("network.proxy.share_proxy_settings", true);
 // pref('network.proxy.http', '');
-// pref("network.proxy.share_proxy_settings", false);
+// pref('network.proxy.http_port', 8080);
 // pref('network.proxy.ssl', '');
 // pref('network.proxy.ftp', '');
 // pref('network.proxy.gopher', '');

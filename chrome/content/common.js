@@ -3,7 +3,7 @@ dump = function(o) {
 	if (o instanceof Error) {
 		['name', 'message', 'fileName', 'lineNumber', 'stack']
 		  .forEach(function(p) { _dump([p, ': ', o[p], '\n'].join('')); });
-	} else { _dump(o + '\n'); }
+	} else { _dump(o + '\n\n'); }
 };
 
 Number.prototype.zerofill = function(len) {
