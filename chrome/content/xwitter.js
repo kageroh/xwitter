@@ -5,7 +5,6 @@
 	var _name = 'xwitter';
 	var _api  = spec.api || 350;
 
-	var _tid; // setInterval ID
 	var _statuses = [];
 	var _in_reply = '';
 
@@ -99,7 +98,6 @@
 				return;
 			  case _modes.test:
 				attrTitle.nodeValue = [_name, 'test'].join(' - ');
-				clearInterval(_tid);
 				test.run();
 				return;
 			}
@@ -470,7 +468,13 @@
 		}
 	};
 	var _init = function() {
-		_tid = setInterval(_refresh(), 15 * 1000);
+		var ms = 15 * 1000;
+		var fn = function() {
+			_refresh();
+			setTimeout(fn, ms);
+		};
+		_refresh();
+		setTimeout(fn, ms);
 	};
 	(function() {
 		if (_access_token && _access_token_secret) {
