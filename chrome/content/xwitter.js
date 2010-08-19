@@ -1,9 +1,7 @@
-﻿var xwitter = function(spec) {
+﻿var xwitter = function() {
 	var that = {};
-	spec = spec || {};
 
 	var _name = 'xwitter';
-	var _api  = spec.api || 350;
 
 	var _statuses = [];
 	var _in_reply = '';
@@ -473,8 +471,7 @@
 			_refresh();
 			setTimeout(fn, ms);
 		};
-		_refresh();
-		setTimeout(fn, ms);
+		fn();
 	};
 	(function() {
 		if (_access_token && _access_token_secret) {
