@@ -436,12 +436,14 @@
 		}
 	});
 
+	var _consumer_token = 'A6PRSyZO5Rsp5CE70y53ow';
+	var _consumer_token_secret = 'S5tYZ02TcqDS8MwvJFzPU6BbBV7ozxvQDMl5IBMLo';
 	var _pref_access_token = 'xwitter.access_token';
 	var _pref_access_token_secret = 'xwitter.access_token_secret';
 	var _access_token = nsPreferences.copyUnicharPref(_pref_access_token, '');
 	var _access_token_secret = nsPreferences.copyUnicharPref(_pref_access_token_secret, '');
 	var _accessor = {
-	  consumerSecret : 'S5tYZ02TcqDS8MwvJFzPU6BbBV7ozxvQDMl5IBMLo',
+	  consumerSecret : _consumer_token_secret,
 	  tokenSecret    : _access_token_secret
 	};
 	var _message = function(spec) {
@@ -451,7 +453,7 @@
 		that.method = spec.type;
 		that.parameters = [];
 
-		OAuth.setParameter(that, 'oauth_consumer_key', 'A6PRSyZO5Rsp5CE70y53ow');
+		OAuth.setParameter(that, 'oauth_consumer_key', _consumer_token);
 		if (_access_token) {
 			OAuth.setParameter(that, 'oauth_token', _access_token);
 		}
