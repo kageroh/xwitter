@@ -485,6 +485,9 @@
 			return;
 		}
 
+		var re_token        = /oauth_token=([^&]+)/;
+		var re_token_secret = /oauth_token_secret=([^&]+)/;
+
 		var message = _message({
 		  type : 'GET',
 		  url  : 'https://api.twitter.com/oauth/request_token'
@@ -494,9 +497,9 @@
 		  url  : message.action,
 		  data : OAuth.getParameterMap(message.parameters),
 		  success: function(xhr) {
-			  var match = xhr.responseText.match(/=[^&]+/g);
-			  _oauth_token        = match[0].substring(1);
-			  _oauth_token_secret = match[1].substring(1);
+			  var res = xhr.responseText;
+			  _oauth_token        = ( re_token.exec(res)        || [] )[1];
+			  _oauth_token_secret = ( re_token_secret.exec(res) || [] )[1];
 
 			  var message = _message({
 				type : 'GET',
@@ -515,9 +518,9 @@
 				url  : message.action,
 				data : OAuth.getParameterMap(message.parameters),
 				success: function(xhr) {
-					var match = xhr.responseText.match(/=[^&]+/g);
-					_oauth_token        = match[0].substring(1);
-					_oauth_token_secret = match[1].substring(1);
+					var res = xhr.responseText;
+					_oauth_token        = ( re_token.exec(res)        || [] )[1];
+					_oauth_token_secret = ( re_token_secret.exec(res) || [] )[1];
 					nsPreferences.setUnicharPref(_pref_access_token, _oauth_token);
 					nsPreferences.setUnicharPref(_pref_access_token_secret, _oauth_token_secret);
 					_init();
