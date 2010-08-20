@@ -131,12 +131,11 @@
 				since_id[_modeUrl] = '';
 			}
 
-			var message = _message();
-			_pushParam(message.parameters, data);
-			message.method = 'GET';
-			message.action = _modeUrl;
-			OAuth.setTimestampAndNonce(message);
-			OAuth.SignatureMethod.sign(message, _accessor);
+			var message = _message({
+			  type : 'GET',
+			  url  : _modeUrl,
+			  data : data
+			});
 			Ajax.request({
 			  type : message.method,
 			  url  : message.action,
@@ -250,12 +249,11 @@
 			_in_reply = '';
 		}
 
-		var message = _message();
-		_pushParam(message.parameters, data);
-		message.method = 'POST';
-		message.action = 'https://api.twitter.com/1/statuses/update.json';
-		OAuth.setTimestampAndNonce(message);
-		OAuth.SignatureMethod.sign(message, _accessor);
+		var message = _message({
+		  type : 'POST',
+		  url  : 'https://api.twitter.com/1/statuses/update.json',
+		  data : data
+		});
 		Ajax.request({
 		  type : message.method,
 		  url  : message.action,
@@ -264,11 +262,10 @@
 	};
 
 	var _destroy = function(element, status_id) {
-		var message = _message();
-		message.method = 'POST';
-		message.action = ['https://api.twitter.com/1/statuses/destroy/', status_id, '.json'].join('');
-		OAuth.setTimestampAndNonce(message);
-		OAuth.SignatureMethod.sign(message, _accessor);
+		var message = _message({
+		  type : 'POST',
+		  url  : ['https://api.twitter.com/1/statuses/destroy/', status_id, '.json'].join('')
+		});
 		Ajax.request({
 		  type : message.method,
 		  url  : message.action,
@@ -282,11 +279,11 @@
 	var _fav = function(element, status_id) {
 		element = $s(_query.text, element);
 		var className = 'favorited', favorited = Element.hasClassName(element, className);
-		var message = _message();
-		message.method = 'POST';
-		message.action = ['https://api.twitter.com/1/favorites/', favorited ? 'destroy' : 'create', '/', status_id, '.json'].join('');
-		OAuth.setTimestampAndNonce(message);
-		OAuth.SignatureMethod.sign(message, _accessor);
+
+		var message = _message({
+		  type : 'POST',
+		  url  : ['https://api.twitter.com/1/favorites/', favorited ? 'destroy' : 'create', '/', status_id, '.json'].join('')
+		});
 		Ajax.request({
 		  type : message.method,
 		  url  : message.action,
@@ -329,11 +326,10 @@
 	};
 
 	var _reTweet = function(status_id) {
-		var message = _message();
-		message.method = 'POST';
-		message.action = ['https://api.twitter.com/1/statuses/retweet/', status_id, '.json'].join('');
-		OAuth.setTimestampAndNonce(message);
-		OAuth.SignatureMethod.sign(message, _accessor);
+		var message = _message({
+		  type : 'POST',
+		  url  : ['https://api.twitter.com/1/statuses/retweet/', status_id, '.json'].join('')
+		});
 		Ajax.request({
 		  type : message.method,
 		  url  : message.action,
@@ -342,11 +338,10 @@
 	};
 
 	var _rate = function() {
-		var message = _message();
-		message.method = 'GET';
-		message.action = 'https://api.twitter.com/1/account/rate_limit_status.json';
-		OAuth.setTimestampAndNonce(message);
-		OAuth.SignatureMethod.sign(message, _accessor);
+		var message = _message({
+		  type : 'GET',
+		  url  : 'https://api.twitter.com/1/account/rate_limit_status.json'
+		});
 		Ajax.request({
 		  type : message.method,
 		  url  : message.action,
@@ -442,26 +437,34 @@
 	var _pref_access_token_secret = 'xwitter.access_token_secret';
 	var _access_token = nsPreferences.copyUnicharPref(_pref_access_token, '');
 	var _access_token_secret = nsPreferences.copyUnicharPref(_pref_access_token_secret, '');
-	var _consumer_key = 'A6PRSyZO5Rsp5CE70y53ow';
-	var _consumer_secret = 'S5tYZ02TcqDS8MwvJFzPU6BbBV7ozxvQDMl5IBMLo';
-	var _accessor = { consumerSecret: _consumer_secret, tokenSecret: _access_token_secret };
-	var _message = function() {
+	var _accessor = (function() {
+		return {
+		  consumerSecret : 'S5tYZ02TcqDS8MwvJFzPU6BbBV7ozxvQDMl5IBMLo',
+		  tokenSecret    : _access_token_secret
+		};
+	})();
+	var _message = function(spec) {
 		var that = {};
-		that.action = null;
-		that.method = null;
+
+		that.action = spec.url;
+		that.method = spec.type;
 		that.parameters = [];
-		that.parameters.push([ 'oauth_consumer_key', _consumer_key ]);
+
+		that.parameters.push([ 'oauth_consumer_key', 'A6PRSyZO5Rsp5CE70y53ow' ]);
 		if (_access_token) {
 			that.parameters.push([ 'oauth_token', _access_token ]);
 		}
-		return that;
-	};
-	var _pushParam = function(params, data) {
+		var data = spec.data, params = that.parameters;
 		for (var prop in data) {
 			if (data.hasOwnProperty(prop)) {
 				params.push([ prop, data[prop] ]);
 			}
 		}
+
+		OAuth.setTimestampAndNonce(that);
+		OAuth.SignatureMethod.sign(that, _accessor);
+
+		return that;
 	};
 	var _init = function() {
 		var ms = 15 * 1000;
@@ -476,12 +479,11 @@
 			_init();
 			return;
 		}
-		var message = _message();
+		var message = _message({
+		  type : 'GET',
+		  url  : 'https://api.twitter.com/oauth/request_token'
+		});
 
-		message.method = 'GET';
-		message.action = 'https://api.twitter.com/oauth/request_token';
-		OAuth.setTimestampAndNonce(message);
-		OAuth.SignatureMethod.sign(message, _accessor);
 		Ajax.request({
 		  type : message.method,
 		  url  : message.action,
@@ -493,7 +495,6 @@
 			  message.parameters.push([ 'oauth_token', oauth_token ]);
 			  _accessor.tokenSecret = oauth_token_secret;
 
-			  message.method = 'GET';
 			  message.action = 'https://api.twitter.com/oauth/authorize';
 			  OAuth.setTimestampAndNonce(message);
 			  OAuth.SignatureMethod.sign(message, _accessor);
