@@ -156,8 +156,6 @@
 				  }
 			  }
 			});
-
-			return arguments.callee;
 		};
 	})();
 
