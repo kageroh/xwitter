@@ -440,12 +440,9 @@
 	var _consumer_token_secret = 'S5tYZ02TcqDS8MwvJFzPU6BbBV7ozxvQDMl5IBMLo';
 	var _pref_access_token = 'xwitter.access_token';
 	var _pref_access_token_secret = 'xwitter.access_token_secret';
-	var _access_token = nsPreferences.copyUnicharPref(_pref_access_token, '');
-	var _access_token_secret = nsPreferences.copyUnicharPref(_pref_access_token_secret, '');
-	var _accessor = {
-	  consumerSecret : _consumer_token_secret,
-	  tokenSecret    : _access_token_secret
-	};
+	var _oauth_token = nsPreferences.copyUnicharPref(_pref_access_token, '');
+	var _oauth_token_secret = nsPreferences.copyUnicharPref(_pref_access_token_secret, '');
+
 	var _message = function(spec) {
 		var that = {};
 
@@ -454,8 +451,8 @@
 		that.parameters = [];
 
 		OAuth.setParameter(that, 'oauth_consumer_key', _consumer_token);
-		if (_access_token) {
-			OAuth.setParameter(that, 'oauth_token', _access_token);
+		if (_oauth_token) {
+			OAuth.setParameter(that, 'oauth_token', _oauth_token);
 		}
 		var data = spec.data;
 		for (var prop in data) {
@@ -465,10 +462,14 @@
 		}
 
 		OAuth.setTimestampAndNonce(that);
-		OAuth.SignatureMethod.sign(that, _accessor);
+		OAuth.SignatureMethod.sign(that, {
+		  consumerSecret : _consumer_token_secret,
+		  tokenSecret    : _oauth_token_secret
+		});
 
 		return that;
 	};
+
 	var _init = function() {
 		var ms = 15 * 1000;
 		var fn = function() {
@@ -477,8 +478,9 @@
 		};
 		fn();
 	};
+
 	(function() {
-		if (_access_token && _access_token_secret) {
+		if (_oauth_token && _oauth_token_secret) {
 			_init();
 			return;
 		}
@@ -487,43 +489,38 @@
 		  type : 'GET',
 		  url  : 'https://api.twitter.com/oauth/request_token'
 		});
-
 		Ajax.request({
 		  type : message.method,
 		  url  : message.action,
 		  data : OAuth.getParameterMap(message.parameters),
 		  success: function(xhr) {
 			  var match = xhr.responseText.match(/=[^&]+/g);
-			  var oauth_token        = match[0].substring(1);
-			  var oauth_token_secret = match[1].substring(1);
-			  OAuth.setParameter(message, 'oauth_token', oauth_token);
-			  _accessor.tokenSecret = oauth_token_secret;
+			  _oauth_token        = match[0].substring(1);
+			  _oauth_token_secret = match[1].substring(1);
 
-			  message.action = 'https://api.twitter.com/oauth/authorize';
-			  OAuth.setTimestampAndNonce(message);
-			  OAuth.SignatureMethod.sign(message, _accessor);
-
+			  var message = _message({
+				type : 'GET',
+				url  : 'https://api.twitter.com/oauth/authorize'
+			  });
 			  var win = window.open(OAuth.addToURL(message.action, message.parameters));
 			  var oauth_verifier = prompt('PIN').trim(); win.close();
-			  OAuth.setParameter(message, 'oauth_verifier', oauth_verifier);
 
-			  message.method = 'POST';
-			  message.action = 'https://api.twitter.com/oauth/access_token';
-			  OAuth.setTimestampAndNonce(message);
-			  OAuth.SignatureMethod.sign(message, _accessor);
-
+			  var message = _message({
+				type : 'POST',
+				url  : 'https://api.twitter.com/oauth/access_token',
+				data : { 'oauth_verifier': oauth_verifier }
+			  });
 			  Ajax.request({
 				type : message.method,
 				url  : message.action,
 				data : OAuth.getParameterMap(message.parameters),
 				success: function(xhr) {
 					var match = xhr.responseText.match(/=[^&]+/g);
-					_access_token        = match[0].substring(1);
-					_access_token_secret = match[1].substring(1);
-					_accessor.tokenSecret = _access_token_secret;
+					_oauth_token        = match[0].substring(1);
+					_oauth_token_secret = match[1].substring(1);
+					nsPreferences.setUnicharPref(_pref_access_token, _oauth_token);
+					nsPreferences.setUnicharPref(_pref_access_token_secret, _oauth_token_secret);
 					_init();
-					nsPreferences.setUnicharPref(_pref_access_token, _access_token);
-					nsPreferences.setUnicharPref(_pref_access_token_secret, _access_token_secret);
 				}
 			  });
 		  }
