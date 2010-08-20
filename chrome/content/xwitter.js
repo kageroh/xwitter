@@ -373,12 +373,12 @@
 		} while (node = node.nextSibling);
 
 		function aloop (n, f) {
-			var i = 0, end = {}, ret = null;
+			var i = 0, ret = null;
 			return Deferred.next(function () {
 				var t = (new Date()).getTime();
 			  divide: {
 				  do {
-					  if (i >= n) break divide;
+					  if (i >= n) { break divide; }
 					  ret = f(i++);
 				  } while ((new Date()).getTime() - t < 20);
 				  return Deferred.call(arguments.callee);
