@@ -453,14 +453,14 @@
 		that.method = spec.type;
 		that.parameters = [];
 
-		that.parameters.push([ 'oauth_consumer_key', 'A6PRSyZO5Rsp5CE70y53ow' ]);
+		OAuth.setParameter(that, 'oauth_consumer_key', 'A6PRSyZO5Rsp5CE70y53ow');
 		if (_access_token) {
-			that.parameters.push([ 'oauth_token', _access_token ]);
+			OAuth.setParameter(that, 'oauth_token', _access_token);
 		}
-		var data = spec.data, params = that.parameters;
+		var data = spec.data;
 		for (var prop in data) {
 			if (data.hasOwnProperty(prop)) {
-				params.push([ prop, data[prop] ]);
+				OAuth.setParameter(that, prop, data[prop]);
 			}
 		}
 
@@ -501,13 +501,7 @@
 			  message.action = 'https://api.twitter.com/oauth/authorize';
 			  OAuth.setTimestampAndNonce(message);
 			  OAuth.SignatureMethod.sign(message, _accessor);
-			  var pairs = [], data = OAuth.getParameterMap(message.parameters);
-			  for (var prop in data) {
-				  if (data.hasOwnProperty(prop)) {
-					  pairs.push([prop, encodeURIComponent(data[prop])].join('='));
-				  }
-			  }
-			  var win = window.open(message.action + '?' + pairs.join('&'));
+			  var win = window.open(OAuth.addToURL(message.action, message.parameters));
 			  var oauth_verifier = prompt('PIN').trim(); win.close();
 			  message.parameters.push([ 'oauth_verifier', oauth_verifier ]);
 
