@@ -24,7 +24,7 @@
 	  findUrl    : 'url',
 	  flee       : 'flee',
 	  list       : 'list',
-	  mention    : 'mention',
+	  mention    : 'men',
 	  quoteTweet : 'qt',
 	  reply      : '@',
 	  reTweet    : 'rt',

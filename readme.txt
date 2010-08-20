@@ -21,7 +21,7 @@
 	:qt      {num}                引用してツイート (in_reply_to_status_id が付きます)
 	:rt      {num}                リツイート
 	:del     {num}                削除
-	:mention                      言及 (@自分へのツイート) 取得モード
+	:men                          言及 (@自分へのツイート) 取得モード
 	:user    {username}           特定ユーザのツイート取得モード
 	:list    {username/listname}  リストのツイート取得モード (自分がフォローしているリストのみ)
 	:tl                           mention, user, list モードから TL 取得モードに戻る
