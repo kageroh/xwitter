@@ -361,7 +361,6 @@
 
 		var nodes = [], node = _box.firstChild;
 		do {
-			node.style.display = 'none';
 			nodes.push(node);
 		} while (node = node.nextSibling);
 
@@ -381,10 +380,14 @@
 
 		aloop(nodes.length, function(i) {
 			_box.removeChild(nodes[i]);
+			nodes[i] = null;
 		}).
-		  error(function(e) {
-			  dump(e);
-		  });
+		  next(function() {
+			  nodes.length = 0;
+		  }).
+			error(function(e) {
+				dump(e);
+			});
 	};
 
 	var _save = function(xml) {
