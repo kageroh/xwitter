@@ -493,7 +493,7 @@
 			  var match = xhr.responseText.match(/=[^&]+/g);
 			  var oauth_token        = match[0].substring(1);
 			  var oauth_token_secret = match[1].substring(1);
-			  message.parameters.push([ 'oauth_token', oauth_token ]);
+			  OAuth.setParameter(message, 'oauth_token', oauth_token);
 			  _accessor.tokenSecret = oauth_token_secret;
 
 			  message.action = 'https://api.twitter.com/oauth/authorize';
@@ -501,7 +501,7 @@
 			  OAuth.SignatureMethod.sign(message, _accessor);
 			  var win = window.open(OAuth.addToURL(message.action, message.parameters));
 			  var oauth_verifier = prompt('PIN').trim(); win.close();
-			  message.parameters.push([ 'oauth_verifier', oauth_verifier ]);
+			  OAuth.setParameter(message, 'oauth_verifier', oauth_verifier);
 
 			  message.method = 'POST';
 			  message.action = 'https://api.twitter.com/oauth/access_token';
