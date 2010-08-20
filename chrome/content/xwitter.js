@@ -88,7 +88,7 @@
 			switch (mode) {
 			  case _modes.tl:
 				attrTitle.nodeValue = _name;
-				_modeUrl = 'https://api.twitter.com/1/statuses/friends_timeline.xml';
+				_modeUrl = 'https://api.twitter.com/1/statuses/home_timeline.xml';
 				return;
 			  case _modes.mention:
 				attrTitle.nodeValue = [_name, 'mention'].join(' - ');
