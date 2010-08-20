@@ -482,6 +482,7 @@
 			_init();
 			return;
 		}
+
 		var message = _message({
 		  type : 'GET',
 		  url  : 'https://api.twitter.com/oauth/request_token'
@@ -501,6 +502,7 @@
 			  message.action = 'https://api.twitter.com/oauth/authorize';
 			  OAuth.setTimestampAndNonce(message);
 			  OAuth.SignatureMethod.sign(message, _accessor);
+
 			  var win = window.open(OAuth.addToURL(message.action, message.parameters));
 			  var oauth_verifier = prompt('PIN').trim(); win.close();
 			  OAuth.setParameter(message, 'oauth_verifier', oauth_verifier);
