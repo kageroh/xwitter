@@ -440,12 +440,10 @@
 	var _pref_access_token_secret = 'xwitter.access_token_secret';
 	var _access_token = nsPreferences.copyUnicharPref(_pref_access_token, '');
 	var _access_token_secret = nsPreferences.copyUnicharPref(_pref_access_token_secret, '');
-	var _accessor = (function() {
-		return {
-		  consumerSecret : 'S5tYZ02TcqDS8MwvJFzPU6BbBV7ozxvQDMl5IBMLo',
-		  tokenSecret    : _access_token_secret
-		};
-	})();
+	var _accessor = {
+	  consumerSecret : 'S5tYZ02TcqDS8MwvJFzPU6BbBV7ozxvQDMl5IBMLo',
+	  tokenSecret    : _access_token_secret
+	};
 	var _message = function(spec) {
 		var that = {};
 
