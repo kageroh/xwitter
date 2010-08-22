@@ -171,10 +171,15 @@
 			var text = $s(_query.text, element);
 			text.textContent = _refChar(text.textContent);
 
-			text.innerHTML = text.innerHTML.
-			  replace(/(@)(\w{1,20})/g, '$1<em class="account">$2</em>').
-				replace(_highlight, '<em class="highlight">$&</em>').
-				  replace(/([\s\S])(\1{3})(\1+)/g, '$1$2<em class="weeded">$3</em>');
+			var worker = new Worker('replace.js');
+			worker.onmessage = (function() {
+				var mytext = text;
+				return function(event) {
+					mytext.innerHTML = event.data.
+					  replace(_highlight, '<em class="highlight">$&</em>');
+				};
+			})();
+			worker.postMessage(text.innerHTML);
 
 			_statuses.push(element);
 		}
