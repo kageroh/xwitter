@@ -120,20 +120,20 @@
 		var myXsltproc = xsltproc('chrome://xwitter/content/xwitter.xsl');
 
 		return function() {
-			var data, mode = _mode;
+			var data, mode = _mode, url = _modeUrl;
 
-			if (since_id[_modeUrl]) {
+			if (since_id[url]) {
 				data = {
 				  count    : mode === _modes.list ? '' : '200',
-				  since_id : since_id[_modeUrl]
+				  since_id : since_id[url]
 				};
 			} else {
-				since_id[_modeUrl] = '';
+				since_id[url] = '';
 			}
 
 			var message = _message({
 			  type : 'GET',
-			  url  : _modeUrl,
+			  url  : url,
 			  data : data
 			});
 			Ajax.request({
@@ -146,7 +146,7 @@
 				  if (!(df.firstChild instanceof HTMLBodyElement)) { return; }
 				  _transform(df);
 
-				  since_id[_modeUrl] = _statuses[_statuses.length - 1].title;
+				  since_id[url] = _statuses[_statuses.length - 1].title;
 				  _box.insertBefore(df, _box.firstChild);
 				  Effects.fadeIn(_box.firstChild, 0.5);
 
