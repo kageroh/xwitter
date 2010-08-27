@@ -2,6 +2,7 @@
 	var that = {};
 
 	var _name = 'xwitter';
+	var _attrTitle = document.documentElement.getAttributeNode('title');
 
 	var _statuses = [];
 	var _in_reply = '';
@@ -80,41 +81,37 @@
 	var _mode; // _modes.xxx
 	var _modeUrl;
 
-	var _changeMode = (function() {
-		var attrTitle = document.documentElement.getAttributeNode('title');
+	var _changeMode = function(mode, param) {
+		_mode = mode;
 
-		return function(mode, param) {
-			_mode = mode;
+		switch (mode) {
+		  case _modes.tl:
+			_attrTitle.nodeValue = _name + _footer;
+			_modeUrl = 'https://api.twitter.com/1/statuses/home_timeline.xml';
+			return;
+		  case _modes.mention:
+			_attrTitle.nodeValue = [_name, 'mention'].join(' - ') + _footer;
+			_modeUrl = 'https://api.twitter.com/1/statuses/mentions.xml';
+			return;
+		  case _modes.test:
+			_attrTitle.nodeValue = [_name, 'test'].join(' - ') + _footer;
+			test.run();
+			return;
+		}
 
-			switch (mode) {
-			  case _modes.tl:
-				attrTitle.nodeValue = _name;
-				_modeUrl = 'https://api.twitter.com/1/statuses/home_timeline.xml';
-				return;
-			  case _modes.mention:
-				attrTitle.nodeValue = [_name, 'mention'].join(' - ');
-				_modeUrl = 'https://api.twitter.com/1/statuses/mentions.xml';
-				return;
-			  case _modes.test:
-				attrTitle.nodeValue = [_name, 'test'].join(' - ');
-				test.run();
-				return;
-			}
+		if (!param) { return; }
 
-			if (!param) { return; }
-
-			attrTitle.nodeValue = [_name, param].join(' - ');
-			switch (mode) {
-			  case _modes.user:
-				_modeUrl = 'https://api.twitter.com/1/statuses/user_timeline/' + param + '.xml';
-				return;
-			  case _modes.list:
-				var arr = param.split('/');
-				_modeUrl = ['https://api.twitter.com/1', arr[0], 'lists', arr[1], 'statuses.xml'].join('/');
-				return;
-			}
-		};
-	})();
+		_attrTitle.nodeValue = [_name, param].join(' - ') + _footer;
+		switch (mode) {
+		  case _modes.user:
+			_modeUrl = 'https://api.twitter.com/1/statuses/user_timeline/' + param + '.xml';
+			return;
+		  case _modes.list:
+			var arr = param.split('/');
+			_modeUrl = ['https://api.twitter.com/1', arr[0], 'lists', arr[1], 'statuses.xml'].join('/');
+			return;
+		}
+	};
 
 	var _refresh = (function() {
 		var since_id = {};
@@ -248,7 +245,7 @@
 	var _update = function(value) {
 		if (!value || _tokenize(value)) { return; }
 
-		value = [ value, _footer ].join(' ');
+		value += _footer;
 		if (value.length > 140) {
 			_textbox.select();
 			return;
@@ -353,7 +350,8 @@
 	var _footer = '';
 
 	var _tag = function(text) {
-		_footer = text || '';
+		_footer = text ? ( ' ' + text ) : '';
+		_attrTitle.nodeValue += _footer;
 	};
 
 	var _rate = function() {
@@ -584,27 +582,27 @@
 
 	test.changeMode = function() {
 		var param = 'foo/bar';
-		var attrTitle = document.documentElement.getAttributeNode('title');
+		var _attrTitle = document.documentElement.getAttributeNode('title');
 		var arr = param.split('/');
 
 		_changeMode(_modes.tl, param);
 		test.ok('_changeMode 1', _mode, _modes.tl);
-		test.ok('_changeMode 2', attrTitle.nodeValue, _name);
+		test.ok('_changeMode 2', _attrTitle.nodeValue, _name);
 		test.ok('_changeMode 3', _modeUrl, 'https://api.twitter.com/1/statuses/friends_timeline.xml');
 
 		_changeMode(_modes.mention, param);
 		test.ok('_changeMode 4', _mode, _modes.mention);
-		test.ok('_changeMode 5', attrTitle.nodeValue, [_name, 'mention'].join(' - '));
+		test.ok('_changeMode 5', _attrTitle.nodeValue, [_name, 'mention'].join(' - '));
 		test.ok('_changeMode 6', _modeUrl, 'https://api.twitter.com/1/statuses/mentions.xml');
 
 		_changeMode(_modes.user, param);
 		test.ok('_changeMode 7', _mode, _modes.user);
-		test.ok('_changeMode 8', attrTitle.nodeValue, [_name, param].join(' - '));
+		test.ok('_changeMode 8', _attrTitle.nodeValue, [_name, param].join(' - '));
 		test.ok('_changeMode 9', _modeUrl, 'https://api.twitter.com/1/statuses/user_timeline/' + param + '.xml');
 
 		_changeMode(_modes.list, param);
 		test.ok('_changeMode a', _mode, _modes.list);
-		test.ok('_changeMode b', attrTitle.nodeValue, [_name, param].join(' - '));
+		test.ok('_changeMode b', _attrTitle.nodeValue, [_name, param].join(' - '));
 		test.ok('_changeMode c', _modeUrl, ['https://api.twitter.com/1', arr[0], 'lists', arr[1], 'statuses.xml'].join('/'));
 	};
 
