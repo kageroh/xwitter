@@ -18,7 +18,6 @@
 	};
 
 	var _cmds = {
-	  rate       : 'api',
 	  destroy    : 'del',
 	  fav        : 'fav',
 	  findUrl    : 'url',
@@ -26,8 +25,10 @@
 	  list       : 'list',
 	  mention    : 'men',
 	  quoteTweet : 'qt',
+	  rate       : 'api',
 	  reply      : '@',
 	  reTweet    : 'rt',
+	  tag        : 'tag',
 	  tl         : 'tl',
 	  user       : 'user',
 	  test       : 'test'
@@ -236,6 +237,7 @@
 			  case _cmds.user    : _changeMode ( _modes.user,    text ); return true;
 			  case _cmds.list    : _changeMode ( _modes.list,    text ); return true;
 			  case _cmds.test    : _changeMode ( _modes.test          ); return true;
+			  case _cmds.tag     : _tag(text); return true;
 			  case _cmds.rate    : _rate(); return true;
 			  case _cmds.flee    : _flee(); return true;
 			}
@@ -245,6 +247,12 @@
 
 	var _update = function(value) {
 		if (!value || _tokenize(value)) { return; }
+
+		value = [ value, _footer ].join(' ');
+		if (value.length > 140) {
+			_textbox.select();
+			return;
+		}
 
 		var data = {
 		  status : value
@@ -342,6 +350,12 @@
 		});
 	};
 
+	var _footer = '';
+
+	var _tag = function(text) {
+		_footer = text || '';
+	};
+
 	var _rate = function() {
 		var message = _message({
 		  type : 'GET',
@@ -357,6 +371,7 @@
 				  json.remaining_hits,
 				  json.hourly_limit
 				  ].join('/');
+			  _textbox.select();
 		  }
 		});
 	};
