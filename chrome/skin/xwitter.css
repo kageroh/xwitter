@@ -5,6 +5,7 @@
 * {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
 
 xul|box#statuses {
@@ -15,6 +16,11 @@ xul|box#statuses {
   overflow: auto;
   -moz-user-select: text;
   -moz-box-orient: vertical;
+}
+
+div.meta,
+p {
+  width: 420px;
 }
 
 xul|textbox#status,
@@ -40,7 +46,6 @@ h1 {
 
 div.meta {
   white-space: nowrap;
-  width: 400px;
   overflow: hidden;
 }
 
@@ -127,7 +132,7 @@ em.weeded {
 }
 
 img {
-  margin: auto .5em;
+  margin: auto 6px;
   border: 1px silver solid;
   float: left;
   width: 24px;
