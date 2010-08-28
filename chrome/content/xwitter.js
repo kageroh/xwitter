@@ -47,7 +47,7 @@
 
 	var _matchCmd = (function() {
 		var arr = [], obj = _cmds;
-		for (var prop in obj) {
+		for (let prop in obj) {
 			if (obj.hasOwnProperty(prop)) {
 				arr.push(obj[prop]);
 			}
@@ -185,9 +185,9 @@
 	})();
 
 	var _transform = function(df) {
-		var element, elements = $(_query.status, df.firstChild);
-		for (var i = elements.length; i--;) {
-			element = elements[i];
+		var elements = $(_query.status, df.firstChild);
+		for (let i = elements.length; i--;) {
+			var element = elements[i];
 
 			$(_query.marker, element).attr('title', _statuses.length.toString(10));
 
@@ -367,8 +367,8 @@
 
 	var _quoteTweet = function(element, status_id) {
 		_in_reply = status_id;
-		_textbox.val(' QT @' + $(_query.screen_name, element).text() + ': ' + $(_query.text, element).text());
-		_textbox.focus();
+		_textbox.val(' QT @' + $(_query.screen_name, element).text() + ': ' + $(_query.text, element).text()).
+		  focus();
 	};
 
 	var _reply = function(element, status_id) {
@@ -479,7 +479,7 @@
 			OAuth.setParameter(that, 'oauth_token', _oauth_token);
 		}
 		var data = spec.data;
-		for (var prop in data) {
+		for (let prop in data) {
 			if (data.hasOwnProperty(prop)) {
 				OAuth.setParameter(that, prop, data[prop]);
 			}
