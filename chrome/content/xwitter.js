@@ -289,7 +289,7 @@
 		if (value.length > 140) {
 			value = _shortenUrl(value);
 			if (value.length > 140) {
-				_textbox.focus();
+				_textbox.select();
 				return;
 			}
 		}
@@ -359,7 +359,7 @@
 			ret.push(JSON.parse(xhr.responseText).url || url);
 		});
 		_textbox.val(ret.join(' '));
-		_textbox.focus();
+		_textbox.select();
 	};
 
 	var _quoteTweet = function(element, status_id) {
@@ -408,7 +408,7 @@
 				  json.remaining_hits,
 				  json.hourly_limit
 				  ].join('/'));
-			  _textbox.focus();
+			  _textbox.select();
 		  }
 		});
 	};
