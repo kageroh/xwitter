@@ -46,6 +46,8 @@
 		return new RegExp('^(:)(' + arr.join('|') + '|.*)(?:\\s+(\\d+))?(?:\\s+(.+))?$');
 	})();
 
+	var _matchUrl = /(https?:\/\/[\-_.!~*\'()\w;\/?:\@&=+\$,%#]+)/g;
+
 	// ================================================================================================================================
 
 	var _parseTimeOffset = function(str) {
@@ -267,13 +269,32 @@
 		return true;
 	};
 
+	var _shortenUrl = function(value) {
+		return value.replace(_matchUrl, function($_, $1) {
+			var xhr = Ajax.request({
+			  type : 'GET',
+			  url  : 'http://api.bit.ly/v3/shorten',
+			  data : {
+				login   : 'kageroh',
+				apiKey  : 'R_8a4f42906456aa208ea827950cd378ad',
+				longUrl : $1
+			  }
+			}, true);
+			var json = JSON.parse(xhr.responseText);
+			return json.status_txt === 'OK' ? json.data.url : $1;
+		});
+	};
+
 	var _update = function(value) {
 		if (!value || _tokenize(value)) { return; }
 
 		value += _footer;
 		if (value.length > 140) {
-			_textbox.select();
-			return;
+			value = _shortenUrl(value);
+			if (value.length > 140) {
+				_textbox.select();
+				return;
+			}
 		}
 
 		var data = {
@@ -334,18 +355,17 @@
 	};
 
 	var _findUrl = function(element) {
-		var matchUrl = /(https?:\/\/[\-_.!~*\'()\w;\/?:\@&=+\$,%#]+)/;
-		var url = (matchUrl.exec($s(_query.text, element).textContent) || [])[1];
-		if (!url) { return; }
-
-		Ajax.request({
-		  type : 'GET',
-		  url  : 'http://ss-o.net/api/reurl.json?url=' + encodeURIComponent(url),
-		  success: function(xhr) {
-			  _textbox.value = JSON.parse(xhr.responseText).url || url;
-			  _textbox.select();
-		  }
-		});
+		var match, ret = [], text = $s(_query.text, element).textContent;
+		while ( (match = _matchUrl.exec(text)) !== null ) {
+			var url = match[0];
+			var xhr = Ajax.request({
+			  type : 'GET',
+			  url  : 'http://ss-o.net/api/reurl.json?url=' + encodeURIComponent(url)
+			}, true);
+			ret.push(JSON.parse(xhr.responseText).url || url);
+		}
+		_textbox.value = ret.join(' ');
+		_textbox.select();
 	};
 
 	var _quoteTweet = function(element, status_id) {

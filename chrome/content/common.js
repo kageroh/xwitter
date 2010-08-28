@@ -39,7 +39,7 @@ var xsltproc = function(path) {
 };
 
 var Ajax = {
-	request: function(options) {
+	request: function(options, sync) {
 		var xhr = new XMLHttpRequest();
 		xhr.onreadystatechange = function() { try {
 			if (xhr.readyState !== 4 || xhr.status !== 200) { return; }
@@ -62,11 +62,12 @@ var Ajax = {
 			}
 		}
 
-		xhr.open(options.type, options.url);
+		xhr.open(options.type, options.url, !sync);
 		if (options.type === 'POST') {
 			xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 		}
 		xhr.send(options.data || null);
+		return xhr;
 	}
 };
 
