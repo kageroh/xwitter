@@ -25,6 +25,7 @@
 	  flee       : 'flee',
 	  list       : 'list',
 	  mention    : 'men',
+	  search     : 'q',
 	  quoteTweet : 'qt',
 	  rate       : 'api',
 	  reply      : '@',
@@ -76,10 +77,13 @@
 	  mention : 'mention',
 	  user    : 'user',
 	  list    : 'list',
+	  search  : 'search',
 	  test    : 'test'
 	};
 	var _mode; // _modes.xxx
 	var _modeUrl;
+
+	var _q = '';
 
 	var _changeMode = function(mode, param) {
 		_mode = mode;
@@ -110,23 +114,32 @@
 			var arr = param.split('/');
 			_modeUrl = ['https://api.twitter.com/1', arr[0], 'lists', arr[1], 'statuses.xml'].join('/');
 			return;
+		  case _modes.search:
+			_q = param;
+			_modeUrl = 'https://search.twitter.com/search.atom';
+			return;
 		}
 	};
 
 	var _refresh = (function() {
 		var since_id = {};
 		var myXsltproc = xsltproc('chrome://xwitter/content/xwitter.xsl');
+		var atom2stats = xsltproc('chrome://xwitter/content/atom2stats.xsl');
 
 		return function() {
-			var data, mode = _mode, url = _modeUrl;
+			var data = {}, mode = _mode, url = _modeUrl;
 
 			if (since_id[url]) {
-				data = {
-				  count    : mode === _modes.list ? '' : '200',
-				  since_id : since_id[url]
-				};
+				data.count = mode === _modes.list ? '' : '200';
+				data.since_id = since_id[url];
 			} else {
 				since_id[url] = '';
+			}
+
+			switch (mode) {
+			  case _modes.search:
+				data.q = _q;
+				break;
 			}
 
 			var message = _message({
@@ -139,7 +152,14 @@
 			  url  : message.action,
 			  data : OAuth.getParameterMap(message.parameters),
 			  success: function(xhr) {
-				  var df = myXsltproc.transformToFragment(xhr.responseXML, document);
+				  var xml = xhr.responseXML;
+				  switch (mode) {
+					case _modes.search:
+					  xml = atom2stats.transformToFragment(xml, document);
+					  break;
+				  }
+
+				  var df = myXsltproc.transformToFragment(xml, document);
 
 				  if (!(df.firstChild instanceof HTMLBodyElement)) { return; }
 				  _transform(df);
@@ -187,7 +207,13 @@
 		var arr = created_at.split(/\s/);
 		var date = new Date([arr[1], arr[2] + ',', arr[5], arr[3]].join(' '));
 		date.setSeconds(date.getSeconds() + _timeOffset);
-		return [date.getHours().zerofill(2), date.getMinutes().zerofill(2)].join(':');
+		var na = '--';
+		var h = date.getHours().zerofill(2);
+		var m = date.getMinutes().zerofill(2);
+		return [
+			isNaN(h) ? na : h,
+			isNaN(m) ? na : m,
+			].join(':');
 	};
 
 	var _refChar = (function() {
@@ -233,6 +259,7 @@
 			  case _cmds.mention : _changeMode ( _modes.mention       ); return true;
 			  case _cmds.user    : _changeMode ( _modes.user,    text ); return true;
 			  case _cmds.list    : _changeMode ( _modes.list,    text ); return true;
+			  case _cmds.search  : _changeMode ( _modes.search,  text ); return true;
 			  case _cmds.test    : _changeMode ( _modes.test          ); return true;
 			  case _cmds.tag     : _tag(text); return true;
 			  case _cmds.rate    : _rate(); return true;

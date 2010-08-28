@@ -32,7 +32,7 @@
 		  <time><xsl:value-of select="created_at" /></time>
 		  <xsl:text>via </xsl:text>
 		  <em class="source">
-			<xsl:value-of select="regexp:replace(source, '^&lt;a href=&quot;.+&quot; rel=&quot;nofollow&quot;&gt;(.+)&lt;/a&gt;$', '', '$1')" />
+			<xsl:value-of select="regexp:replace(source, '^&lt;a [^&gt;]+&gt;(.+)&lt;/a&gt;$', '', '$1')" />
 		  </em>
 		</footer>
 	  </div>

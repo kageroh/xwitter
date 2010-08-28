@@ -24,6 +24,7 @@
 	:men                          言及 (@自分へのツイート) 取得モード
 	:user    {username}           特定ユーザのツイート取得モード
 	:list    {username/listname}  リストのツイート取得モード (自分がフォローしているリストのみ)
+	:q       {text}               検索モード
 	:tag     {text}               フッター設定
 	:tl                           mention, user, list モードから TL 取得モードに戻る
 	:api                          現在の API 制限回数を取得
