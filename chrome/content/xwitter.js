@@ -171,7 +171,7 @@
 				  Effects.fadeIn(_box.firstChild, 0.5);
 
 				  if (_logSave) {
-					  _save(xhr.responseXML);
+					  _save(xml);
 				  }
 			  }
 			});
