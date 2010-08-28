@@ -110,7 +110,7 @@ em.account {
 }
 
 em.hash-tag {
-  color: #39f;
+  color: #ff4500;
 }
 
 em.highlight {
@@ -129,6 +129,11 @@ em.source::before {
 
 em.source::after {
   content: close-quote;
+}
+
+em.url {
+  text-decoration: underline;
+  color: #39f;
 }
 
 img {

@@ -194,7 +194,8 @@
 			text.html(
 				_refChar(text.text()).
 				replace(/(@)(\w{1,20})/g, '$1<em class="account">$2</em>').
-				replace(/#\S+/g, '<em class="hash-tag">$&</em>').
+				replace(/#\w+/g, '<em class="hash-tag">$&</em>').
+				replace(_matchUrl, '<em class="url">$1</em>').
 				replace(_highlight, '<em class="highlight">$&</em>')
 				);
 
@@ -347,16 +348,16 @@
 	};
 
 	var _findUrl = function(element) {
-		var match, ret = [], text = $(_query.text, element).text();
-		while ( (match = _matchUrl.exec(text)) !== null ) {
-			var url = match[0];
+		var ret = [];
+		$('em.url', element).each(function(index, element) {
+			var url = $(element).text();
 			var xhr = $.ajax({
 			  async: false,
 			  type : 'GET',
 			  url  : 'http://ss-o.net/api/reurl.json?url=' + encodeURIComponent(url)
 			});
 			ret.push(JSON.parse(xhr.responseText).url || url);
-		}
+		});
 		_textbox.val(ret.join(' '));
 		_textbox.focus();
 	};
