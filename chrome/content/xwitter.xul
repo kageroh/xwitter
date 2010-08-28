@@ -9,7 +9,7 @@
   <xul:script type="application/x-javascript" src="chrome://xwitter/content/io.js" />
   <xul:script type="application/x-javascript" src="chrome://xwitter/content/oauth.js" />
   <xul:script type="application/x-javascript" src="chrome://xwitter/content/sha1.js" />
-  <xul:script type="application/x-javascript" src="chrome://xwitter/content/jsdeferred.js" />
+  <xul:script type="application/x-javascript" src="chrome://xwitter/content/jquery-1.4.2.min.js" />
   <xul:script type="application/x-javascript" src="chrome://xwitter/content/common.js" />
   <xul:script type="application/x-javascript" src="chrome://xwitter/content/xwitter.js" />
   <xul:script type="application/x-javascript">xwitter()</xul:script>

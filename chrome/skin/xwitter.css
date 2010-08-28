@@ -109,6 +109,10 @@ em.account {
   color: aqua;
 }
 
+em.hash-tag {
+  color: #39f;
+}
+
 em.highlight {
   color: #00283c;
   background-color: #eedd82;
@@ -125,10 +129,6 @@ em.source::before {
 
 em.source::after {
   content: close-quote;
-}
-
-em.weeded {
-  display: none;
 }
 
 img {

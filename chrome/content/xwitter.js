@@ -7,8 +7,8 @@
 	var _statuses = [];
 	var _in_reply = '';
 
-	var _box = $s('box');
-	var _textbox = $s('textbox');
+	var _box = $s('#statuses');
+	var _textbox = $('#status');
 
 	var _query = {
 		status      : 'section',
@@ -151,11 +151,11 @@
 			  url  : url,
 			  data : data
 			});
-			Ajax.request({
+			$.ajax({
 			  type : message.method,
 			  url  : message.action,
 			  data : OAuth.getParameterMap(message.parameters),
-			  success: function(xhr) {
+			  success: function(data, status, xhr) {
 				  var xml = xhr.responseXML;
 				  switch (mode) {
 					case _modes.search:
@@ -181,27 +181,22 @@
 	})();
 
 	var _transform = function(df) {
-		var element, elements = $S(_query.status, df.firstChild);
+		var element, elements = $(_query.status, df.firstChild);
 		for (var i = elements.length; i--;) {
 			element = elements[i];
 
-			$s(_query.marker, element).title = _statuses.length.toString(10);
+			$(_query.marker, element).attr('title', _statuses.length.toString(10));
 
-			var created_at = $s(_query.created_at, element);
-			created_at.textContent = _dateParse(created_at.textContent);
+			var created_at = $(_query.created_at, element);
+			created_at.text( _dateParse(created_at.text()) );
 
-			var text = $s(_query.text, element);
-			text.textContent = _refChar(text.textContent);
-
-			var worker = new Worker('replace.js');
-			worker.onmessage = (function() {
-				var mytext = text;
-				return function(event) {
-					mytext.innerHTML = event.data.
-					  replace(_highlight, '<em class="highlight">$&</em>');
-				};
-			})();
-			worker.postMessage(text.innerHTML);
+			var text = $(_query.text, element);
+			text.html(
+				_refChar(text.text()).
+				replace(/(@)(\w{1,20})/g, '$1<em class="account">$2</em>').
+				replace(/#\S+/g, '<em class="hash-tag">$&</em>').
+				replace(_highlight, '<em class="highlight">$&</em>')
+				);
 
 			_statuses.push(element);
 		}
@@ -271,7 +266,8 @@
 
 	var _shortenUrl = function(value) {
 		return value.replace(_matchUrl, function($_, $1) {
-			var xhr = Ajax.request({
+			var xhr = $.ajax({
+			  async: false,
 			  type : 'GET',
 			  url  : 'http://api.bit.ly/v3/shorten',
 			  data : {
@@ -279,7 +275,7 @@
 				apiKey  : 'R_8a4f42906456aa208ea827950cd378ad',
 				longUrl : $1
 			  }
-			}, true);
+			});
 			var json = JSON.parse(xhr.responseText);
 			return json.status_txt === 'OK' ? json.data.url : $1;
 		});
@@ -292,7 +288,7 @@
 		if (value.length > 140) {
 			value = _shortenUrl(value);
 			if (value.length > 140) {
-				_textbox.select();
+				_textbox.focus();
 				return;
 			}
 		}
@@ -310,7 +306,7 @@
 		  url  : 'https://api.twitter.com/1/statuses/update.json',
 		  data : data
 		});
-		Ajax.request({
+		$.ajax({
 		  type : message.method,
 		  url  : message.action,
 		  data : OAuth.getParameterMap(message.parameters)
@@ -322,61 +318,58 @@
 		  type : 'POST',
 		  url  : ['https://api.twitter.com/1/statuses/destroy/', status_id, '.json'].join('')
 		});
-		Ajax.request({
+		$.ajax({
 		  type : message.method,
 		  url  : message.action,
 		  data : OAuth.getParameterMap(message.parameters),
 		  success: function() {
-			  element.parentNode.removeChild(element);
+			  $(element).remove();
 		  }
 		});
 	};
 
 	var _fav = function(element, status_id) {
-		element = $s(_query.text, element);
-		var className = 'favorited', favorited = Element.hasClassName(element, className);
+		element = $(_query.text, element);
+		var className = 'favorited', favorited = element.hasClass(className);
 
 		var message = _message({
 		  type : 'POST',
 		  url  : ['https://api.twitter.com/1/favorites/', favorited ? 'destroy' : 'create', '/', status_id, '.json'].join('')
 		});
-		Ajax.request({
+		$.ajax({
 		  type : message.method,
 		  url  : message.action,
 		  data : OAuth.getParameterMap(message.parameters),
 		  success: function() {
-			  if (favorited) {
-				  Element.removeClassName(element, className);
-			  } else {
-				  Element.addClassName(element, className);
-			  }
+			  element[ (favorited ? 'remove' : 'add') + 'Class' ](className);
 		  }
 		});
 	};
 
 	var _findUrl = function(element) {
-		var match, ret = [], text = $s(_query.text, element).textContent;
+		var match, ret = [], text = $(_query.text, element).text();
 		while ( (match = _matchUrl.exec(text)) !== null ) {
 			var url = match[0];
-			var xhr = Ajax.request({
+			var xhr = $.ajax({
+			  async: false,
 			  type : 'GET',
 			  url  : 'http://ss-o.net/api/reurl.json?url=' + encodeURIComponent(url)
-			}, true);
+			});
 			ret.push(JSON.parse(xhr.responseText).url || url);
 		}
-		_textbox.value = ret.join(' ');
-		_textbox.select();
+		_textbox.val(ret.join(' '));
+		_textbox.focus();
 	};
 
 	var _quoteTweet = function(element, status_id) {
 		_in_reply = status_id;
-		_textbox.value = ' QT @' + $s(_query.screen_name, element).textContent + ': ' + $s(_query.text, element).textContent;
+		_textbox.val(' QT @' + $(_query.screen_name, element).text() + ': ' + $(_query.text, element).text());
 		_textbox.focus();
 	};
 
 	var _reply = function(element, status_id) {
 		_in_reply = status_id;
-		_textbox.value = '@' + $s(_query.screen_name, element).textContent + ' ';
+		_textbox.val('@' + $(_query.screen_name, element).text() + ' ');
 		_textbox.focus();
 	};
 
@@ -385,7 +378,7 @@
 		  type : 'POST',
 		  url  : ['https://api.twitter.com/1/statuses/retweet/', status_id, '.json'].join('')
 		});
-		Ajax.request({
+		$.ajax({
 		  type : message.method,
 		  url  : message.action,
 		  data : OAuth.getParameterMap(message.parameters)
@@ -404,53 +397,24 @@
 		  type : 'GET',
 		  url  : 'https://api.twitter.com/1/account/rate_limit_status.json'
 		});
-		Ajax.request({
+		$.ajax({
 		  type : message.method,
 		  url  : message.action,
 		  data : OAuth.getParameterMap(message.parameters),
-		  success: function(xhr) {
-			  var json = JSON.parse(xhr.responseText);
-			  _textbox.value = [
+		  success: function(data) {
+			  var json = JSON.parse(data);
+			  _textbox.val([
 				  json.remaining_hits,
 				  json.hourly_limit
-				  ].join('/');
-			  _textbox.select();
+				  ].join('/'));
+			  _textbox.focus();
 		  }
 		});
 	};
 
 	var _flee = function() {
 		_statuses.length = 0;
-
-		var nodes = [], node = _box.firstChild;
-		do {
-			nodes.push(node);
-		} while (node = node.nextSibling);
-
-		function aloop (n, f) {
-			var i = 0, ret = null;
-			return Deferred.next(function () {
-				var t = (new Date()).getTime();
-			  divide: {
-				  do {
-					  if (i >= n) { break divide; }
-					  ret = f(i++);
-				  } while ((new Date()).getTime() - t < 20);
-				  return Deferred.call(arguments.callee);
-			  }
-			});
-		}
-
-		aloop(nodes.length, function(i) {
-			_box.removeChild(nodes[i]);
-			nodes[i] = null;
-		}).
-		  next(function() {
-			  nodes.length = 0;
-		  }).
-			error(function(e) {
-				dump(e);
-			});
+		$(_box).empty();
 	};
 
 	var _save = function(xml) {
@@ -469,7 +433,7 @@
 
 	_changeMode(_modes.tl);
 
-	Events.bind(window, 'keydown', function(event) {
+	$(window).keydown(function(event) {
 		if (event.ctrlKey) {
 			switch (event.keyCode) {
 			  case KeyEvent.DOM_VK_W:
@@ -479,16 +443,12 @@
 		}
 	});
 
-	Events.bind(_box, 'mousedown', function() {
-		this.focus();
-	});
-
-	Events.bind(_textbox, 'keypress', function(event) {
+	_textbox.keypress(function(event) {
 		switch (event.keyCode) {
 		  case KeyEvent.DOM_VK_RETURN:
 		  case KeyEvent.DOM_VK_ENTER:
-			var value = this.value;
-			this.value = '';
+			var value = _textbox.val();
+			_textbox.val('');
 			_update(value);
 			return;
 		  case KeyEvent.DOM_VK_TAB:
@@ -555,12 +515,12 @@
 		  type : 'GET',
 		  url  : 'https://api.twitter.com/oauth/request_token'
 		});
-		Ajax.request({
+		$.ajax({
 		  type : message.method,
 		  url  : message.action,
 		  data : OAuth.getParameterMap(message.parameters),
-		  success: function(xhr) {
-			  var res = xhr.responseText;
+		  success: function(data) {
+			  var res = data;
 			  _oauth_token        = ( re_token.exec(res)        || [] )[1];
 			  _oauth_token_secret = ( re_token_secret.exec(res) || [] )[1];
 
@@ -576,12 +536,12 @@
 				url  : 'https://api.twitter.com/oauth/access_token',
 				data : { 'oauth_verifier': oauth_verifier }
 			  });
-			  Ajax.request({
+			  $.ajax({
 				type : message.method,
 				url  : message.action,
 				data : OAuth.getParameterMap(message.parameters),
-				success: function(xhr) {
-					var res = xhr.responseText;
+				success: function(data) {
+					var res = data;
 					_oauth_token        = ( re_token.exec(res)        || [] )[1];
 					_oauth_token_secret = ( re_token_secret.exec(res) || [] )[1];
 					nsPreferences.setUnicharPref(_pref_access_token, _oauth_token);
