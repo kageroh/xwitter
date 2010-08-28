@@ -105,17 +105,19 @@
 
 		if (!param) { return; }
 
-		_attrTitle.nodeValue = [_name, param].join(' - ') + _footer;
 		switch (mode) {
 		  case _modes.user:
+			_attrTitle.nodeValue = [_name, param].join(' - ') + _footer;
 			_modeUrl = 'https://api.twitter.com/1/statuses/user_timeline/' + param + '.xml';
 			return;
 		  case _modes.list:
 			var arr = param.split('/');
+			_attrTitle.nodeValue = [_name, param].join(' - ') + _footer;
 			_modeUrl = ['https://api.twitter.com/1', arr[0], 'lists', arr[1], 'statuses.xml'].join('/');
 			return;
 		  case _modes.search:
 			_q = param;
+			_attrTitle.nodeValue = [_name, 'search: ' + param].join(' - ') + _footer;
 			_modeUrl = 'https://search.twitter.com/search.atom';
 			return;
 		}
