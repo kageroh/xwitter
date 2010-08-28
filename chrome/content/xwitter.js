@@ -207,13 +207,9 @@
 		var arr = created_at.split(/\s/);
 		var date = new Date([arr[1], arr[2] + ',', arr[5], arr[3]].join(' '));
 		date.setSeconds(date.getSeconds() + _timeOffset);
-		var na = '--';
 		var h = date.getHours().zerofill(2);
 		var m = date.getMinutes().zerofill(2);
-		return [
-			isNaN(h) ? na : h,
-			isNaN(m) ? na : m,
-			].join(':');
+		return isNaN(h) || isNaN(m) ? 'N/A' : [ h, m ].join(':');
 	};
 
 	var _refChar = (function() {
