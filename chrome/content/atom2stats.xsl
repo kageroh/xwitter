@@ -9,7 +9,7 @@
   <xsl:output method="xml"
 	encoding="utf-8"
 	omit-xml-declaration="no"
-	indent="yes"
+	indent="no"
 	media-type="application/xml" />
 
   <xsl:template match="atom:feed">
