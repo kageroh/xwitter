@@ -3,19 +3,29 @@
 
 	var _name = 'xwitter';
 	var _attrTitle = document.documentElement.getAttributeNode('title');
+	var _subname = '';
+	var _footer = '';
+
+	var _changeTitle = function() {
+		var arr = [];
+		arr.push(_name);
+		if (_subname) { arr.push(_subname); }
+		_attrTitle.nodeValue = arr.join(' - ') + _footer;
+	};
 
 	var _statuses = [];
 	var _in_reply = '';
+	var _q;
 
 	var _box = $s('#statuses');
 	var _textbox = $('#status');
 
 	var _query = {
 		status      : 'section',
-		marker      : 'header',
-		created_at  : 'time',
-		screen_name : 'h1',
-		text        : 'p'
+		marker      : 'header:first',
+		created_at  : 'time:first',
+		screen_name : 'h1:first',
+		text        : 'p:first'
 	};
 
 	var _cmds = {
@@ -32,8 +42,7 @@
 	  reTweet    : 'rt',
 	  tag        : 'tag',
 	  tl         : 'tl',
-	  user       : 'user',
-	  test       : 'test'
+	  user       : 'user'
 	};
 
 	var _matchCmd = (function() {
@@ -79,50 +88,45 @@
 	  mention : 'mention',
 	  user    : 'user',
 	  list    : 'list',
-	  search  : 'search',
-	  test    : 'test'
+	  search  : 'search'
 	};
 	var _mode; // _modes.xxx
 	var _modeUrl;
-
-	var _q = '';
 
 	var _changeMode = function(mode, param) {
 		_mode = mode;
 
 		switch (mode) {
 		  case _modes.tl:
-			_attrTitle.nodeValue = _name + _footer;
+			_subname = '';
 			_modeUrl = 'https://api.twitter.com/1/statuses/home_timeline.xml';
-			return;
+			break;
 		  case _modes.mention:
-			_attrTitle.nodeValue = [_name, 'mention'].join(' - ') + _footer;
+			_subname = 'mention';
 			_modeUrl = 'https://api.twitter.com/1/statuses/mentions.xml';
-			return;
-		  case _modes.test:
-			_attrTitle.nodeValue = [_name, 'test'].join(' - ') + _footer;
-			test.run();
-			return;
+			break;
 		}
+		_changeTitle();
 
 		if (!param) { return; }
 
 		switch (mode) {
 		  case _modes.user:
-			_attrTitle.nodeValue = [_name, param].join(' - ') + _footer;
+			_subname = param;
 			_modeUrl = 'https://api.twitter.com/1/statuses/user_timeline/' + param + '.xml';
-			return;
+			break;
 		  case _modes.list:
 			var arr = param.split('/');
-			_attrTitle.nodeValue = [_name, param].join(' - ') + _footer;
+			_subname = param;
 			_modeUrl = ['https://api.twitter.com/1', arr[0], 'lists', arr[1], 'statuses.xml'].join('/');
-			return;
+			break;
 		  case _modes.search:
 			_q = param;
-			_attrTitle.nodeValue = [_name, 'search: ' + param].join(' - ') + _footer;
+			_subname = 'search: ' + param;
 			_modeUrl = 'https://search.twitter.com/search.atom';
-			return;
+			break;
 		}
+		_changeTitle();
 	};
 
 	var _refresh = (function() {
@@ -192,7 +196,7 @@
 
 			var text = $(_query.text, element);
 			text.html(
-				_refChar(text.text()).
+				_refChar(text.html()).
 				replace(/(@)(\w{1,20})/g, '$1<em class="account">$2</em>').
 				replace(/#\w+/g, '<em class="hash-tag">$&</em>').
 				replace(_matchUrl, '<em class="url">$1</em>').
@@ -256,7 +260,6 @@
 			  case _cmds.user    : _changeMode ( _modes.user,    text ); return true;
 			  case _cmds.list    : _changeMode ( _modes.list,    text ); return true;
 			  case _cmds.search  : _changeMode ( _modes.search,  text ); return true;
-			  case _cmds.test    : _changeMode ( _modes.test          ); return true;
 			  case _cmds.tag     : _tag(text); return true;
 			  case _cmds.rate    : _rate(); return true;
 			  case _cmds.flee    : _flee(); return true;
@@ -358,8 +361,8 @@
 			});
 			ret.push(JSON.parse(xhr.responseText).url || url);
 		});
-		_textbox.val(ret.join(' '));
-		_textbox.select();
+		_textbox.val(ret.join(' ')).
+		  select();
 	};
 
 	var _quoteTweet = function(element, status_id) {
@@ -370,8 +373,8 @@
 
 	var _reply = function(element, status_id) {
 		_in_reply = status_id;
-		_textbox.val('@' + $(_query.screen_name, element).text() + ' ');
-		_textbox.focus();
+		_textbox.val('@' + $(_query.screen_name, element).text() + ' ').
+		  focus();
 	};
 
 	var _reTweet = function(status_id) {
@@ -386,11 +389,9 @@
 		});
 	};
 
-	var _footer = '';
-
 	var _tag = function(text) {
 		_footer = text ? ( ' ' + text ) : '';
-		_attrTitle.nodeValue += _footer;
+		_changeTitle();
 	};
 
 	var _rate = function() {
@@ -403,12 +404,11 @@
 		  url  : message.action,
 		  data : OAuth.getParameterMap(message.parameters),
 		  success: function(data) {
-			  var json = JSON.parse(data);
 			  _textbox.val([
-				  json.remaining_hits,
-				  json.hourly_limit
-				  ].join('/'));
-			  _textbox.select();
+				  data.remaining_hits,
+				  data.hourly_limit
+				  ].join('/')).
+				select();
 		  }
 		});
 	};
@@ -553,101 +553,6 @@
 		  }
 		});
 	})();
-
-	// ================================================================================================================================
-
-	var test = {};
-
-	test.ok = function(comment, val1, val2) {
-		var node = document.createElementNS('http://www.w3.org/1999/xhtml', 'div');
-		node.className = val1 === val2 ? 'test-ok' : 'test-ng';
-		node.innerHTML = comment;
-		_box.appendChild(node);
-	};
-	test.ok.disable = true;
-
-	test.run = function() {
-		for (var prop in test) {
-			if (test.hasOwnProperty(prop) && !test[prop].disable) {
-				test[prop]();
-			}
-		}
-	};
-	test.run.disable = true;
-
-	test.parseTimeOffset = function() {
-		test.ok('_parseTimeOffset 1', _parseTimeOffset('+09:00'), +9.00 * 3600);
-		test.ok('_parseTimeOffset 2', _parseTimeOffset('-00:45'), -0.75 * 3600);
-		test.ok('_parseTimeOffset 3', _parseTimeOffset('foobar'), 0);
-	};
-
-	test.parseHighlight = function() {
-		test.ok('_parseHighlight 1', _parseHighlight('\\r\\n').test('\r\n'), false);
-		test.ok('_parseHighlight 2', _parseHighlight(''), null);
-	};
-
-	test.changeMode = function() {
-		var param = 'foo/bar';
-		var _attrTitle = document.documentElement.getAttributeNode('title');
-		var arr = param.split('/');
-
-		_changeMode(_modes.tl, param);
-		test.ok('_changeMode 1', _mode, _modes.tl);
-		test.ok('_changeMode 2', _attrTitle.nodeValue, _name);
-		test.ok('_changeMode 3', _modeUrl, 'https://api.twitter.com/1/statuses/friends_timeline.xml');
-
-		_changeMode(_modes.mention, param);
-		test.ok('_changeMode 4', _mode, _modes.mention);
-		test.ok('_changeMode 5', _attrTitle.nodeValue, [_name, 'mention'].join(' - '));
-		test.ok('_changeMode 6', _modeUrl, 'https://api.twitter.com/1/statuses/mentions.xml');
-
-		_changeMode(_modes.user, param);
-		test.ok('_changeMode 7', _mode, _modes.user);
-		test.ok('_changeMode 8', _attrTitle.nodeValue, [_name, param].join(' - '));
-		test.ok('_changeMode 9', _modeUrl, 'https://api.twitter.com/1/statuses/user_timeline/' + param + '.xml');
-
-		_changeMode(_modes.list, param);
-		test.ok('_changeMode a', _mode, _modes.list);
-		test.ok('_changeMode b', _attrTitle.nodeValue, [_name, param].join(' - '));
-		test.ok('_changeMode c', _modeUrl, ['https://api.twitter.com/1', arr[0], 'lists', arr[1], 'statuses.xml'].join('/'));
-	};
-
-	test.refresh = function() {
-		_modeUrl = 'http://kgr.s56.xrea.com/xwitter/test.xml';
-		_refresh();
-	};
-
-	test.transform = function() {
-		_highlight = _parseHighlight('i');
-		_modeUrl = 'http://kgr.s56.xrea.com/xwitter/test.xml';
-		_refresh();
-	};
-
-	test.dateParse = function() {
-		_timeOffset = _parseTimeOffset('');
-		test.ok('_dateParse', '22:52', _dateParse('Tue Apr 07 22:52:51 +0000 2009'));
-	};
-
-	test.refChar = function() {
-		test.ok('_refChar', '<>&quot;', _refChar('&lt;&gt;&amp;quo&#116;;'));
-	};
-
-	test.tokenize = function() {
-		_changeMode(_modes.tl);
-		test.ok('_tokenize 1', false, _tokenize('foo:bar'));
-		test.ok('_tokenize 2', true, _tokenize(':baz 9999') && _mode === _modes.tl);
-		test.ok('_tokenize 3', true, _tokenize(':baz 0')    && _mode === _modes.tl);
-		test.ok('_tokenize 4', true, _tokenize(':del 9999') && _mode === _modes.tl);
-		test.ok('_tokenize 5', true, _tokenize(':fav 9999') && _mode === _modes.tl);
-		test.ok('_tokenize 6', true, _tokenize(':url 9999') && _mode === _modes.tl);
-		test.ok('_tokenize 7', true, _tokenize(':qt  9999') && _mode === _modes.tl);
-		test.ok('_tokenize 8', true, _tokenize(':@   9999') && _mode === _modes.tl);
-		test.ok('_tokenize 9', true, _tokenize(':rt  9999') && _mode === _modes.tl);
-		test.ok('_tokenize a', true, _tokenize(':tl')       && _mode === _modes.tl);
-		test.ok('_tokenize b', true, _tokenize(':mention')  && _mode === _modes.mention);
-		test.ok('_tokenize c', true, _tokenize(':user')     && _mode === _modes.user);
-		test.ok('_tokenize d', true, _tokenize(':list')     && _mode === _modes.list);
-	};
 
 	// ================================================================================================================================
 
