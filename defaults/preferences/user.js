@@ -9,5 +9,4 @@
 // pref('network.proxy.socks', '');
 // pref('network.proxy.no_proxies_on', 'localhost, 127.0.0.1');
 pref('xwitter.timeOffset', '+09:00');
-pref('xwitter.highlight', '');
-pref('xwitter.log.save', false);
+pref('xwitter.highlight', 'amasawa');

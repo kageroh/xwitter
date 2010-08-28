@@ -34,9 +34,6 @@
 	defaults\preferences\user.js を編集
 	proxy を使う場合、書式は Mozilla Firefox のそれと同じ
 
-* ログ保存 (オプション)
-	application.ini があるディレクトリに statuses.xml というファイル名で取得した TL を保存します
-
 * 外観の変更
 	chrome\skin\xwitter.css を編集
 

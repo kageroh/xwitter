@@ -1,17 +1,20 @@
 ﻿var xwitter = function() {
-	var that = {};
-
-	var _name = 'xwitter';
-	var _attrTitle = document.documentElement.getAttributeNode('title');
 	var _subname = '';
 	var _footer = '';
 
-	var _changeTitle = function() {
-		var arr = [];
-		arr.push(_name);
-		if (_subname) { arr.push(_subname); }
-		_attrTitle.nodeValue = arr.join(' - ') + _footer;
-	};
+	var _changeTitle = (function() {
+		var _name = 'xwitter';
+		var _attrTitle = document.documentElement.getAttributeNode('title');
+
+		return function() {
+			var arr = [];
+			arr.push(_name);
+			if (_subname) {
+				arr.push(_subname);
+			}
+			_attrTitle.nodeValue = arr.join(' - ') + _footer;
+		};
+	})();
 
 	var _statuses = [];
 	var _in_reply = '';
@@ -45,41 +48,7 @@
 	  user       : 'user'
 	};
 
-	var _matchCmd = (function() {
-		var arr = [], obj = _cmds;
-		for (let prop in obj) {
-			if (obj.hasOwnProperty(prop)) {
-				arr.push(obj[prop]);
-			}
-		}
-		return new RegExp('^(:)(' + arr.join('|') + '|.*)(?:\\s+(\\d+))?(?:\\s+(.+))?$');
-	})();
-
 	var _matchUrl = /(https?:\/\/[\-_.!~*\'()\w;\/?:\@&=+\$,%#]+)/g;
-
-	// ================================================================================================================================
-
-	var _parseTimeOffset = function(str) {
-		var match = /^([+\-])(\d{2}):(\d{2})$/.exec(str) || [];
-		if (match[1] && match[2] && match[3]) {
-			var sign = match[1], time = (parseInt(match[2], 10) + parseInt(match[3], 10) / 60) * 3600;
-			switch (sign) {
-			  case '+' : return +time;
-			  case '-' : return -time;
-			  default  : return 0;
-			}
-		} else {
-			return 0;
-		}
-	};
-
-	var _parseHighlight = function(str) {
-		return str ? new RegExp(str.replace(/\W/g, '\\$&'), 'g') : null;
-	};
-
-	var _timeOffset = _parseTimeOffset(nsPreferences.copyUnicharPref('xwitter.timeOffset', ''));
-	var _highlight = _parseHighlight(nsPreferences.copyUnicharPref('xwitter.highlight', ''));
-	var _logSave = nsPreferences.getBoolPref('xwitter.log.save');
 
 	// ================================================================================================================================
 
@@ -106,26 +75,26 @@
 			_modeUrl = 'https://api.twitter.com/1/statuses/mentions.xml';
 			break;
 		}
-		_changeTitle();
 
-		if (!param) { return; }
-
-		switch (mode) {
-		  case _modes.user:
-			_subname = param;
-			_modeUrl = 'https://api.twitter.com/1/statuses/user_timeline/' + param + '.xml';
-			break;
-		  case _modes.list:
-			var arr = param.split('/');
-			_subname = param;
-			_modeUrl = ['https://api.twitter.com/1', arr[0], 'lists', arr[1], 'statuses.xml'].join('/');
-			break;
-		  case _modes.search:
-			_q = param;
-			_subname = 'search: ' + param;
-			_modeUrl = 'https://search.twitter.com/search.atom';
-			break;
+		if (param) {
+			switch (mode) {
+			  case _modes.user:
+				_subname = param;
+				_modeUrl = 'https://api.twitter.com/1/statuses/user_timeline/' + param + '.xml';
+				break;
+			  case _modes.list:
+				var arr = param.split('/');
+				_subname = param;
+				_modeUrl = ['https://api.twitter.com/1', arr[0], 'lists', arr[1], 'statuses.xml'].join('/');
+				break;
+			  case _modes.search:
+				_q = param;
+				_subname = 'search: ' + param;
+				_modeUrl = 'https://search.twitter.com/search.atom';
+				break;
+			}
 		}
+
 		_changeTitle();
 	};
 
@@ -161,6 +130,8 @@
 			  data : OAuth.getParameterMap(message.parameters),
 			  success: function(data, status, xhr) {
 				  var xml = xhr.responseXML;
+				  xhr = null;
+
 				  switch (mode) {
 					case _modes.search:
 					  xml = atom2stats.transformToFragment(xml, document);
@@ -168,53 +139,89 @@
 				  }
 
 				  var df = myXsltproc.transformToFragment(xml, document);
+				  xml = null;
 
-				  if (!(df.firstChild instanceof HTMLBodyElement)) { return; }
-				  _transform(df);
-
-				  since_id[url] = _statuses[_statuses.length - 1].title;
-				  _box.insertBefore(df, _box.firstChild);
-				  Effects.fadeIn(_box.firstChild, 0.5);
-
-				  if (_logSave) {
-					  _save(xml);
+				  if (!(df.firstChild instanceof HTMLBodyElement)) {
+					  return;
 				  }
+
+				  _transform(df);
+				  since_id[url] = _statuses[_statuses.length - 1].title;
+
+				  _box.insertBefore(df, _box.firstChild);
+				  df = null;
+
+				  Effects.fadeIn(_box.firstChild, 0.5);
 			  }
 			});
 		};
 	})();
 
-	var _transform = function(df) {
-		var elements = $(_query.status, df.firstChild);
-		for (let i = elements.length; i--;) {
-			var element = elements[i];
+	var _transform = (function() {
+		var matchAccount = /(@)(\w{1,20})/g;
+		var matchHashTag = /#\w+/g;
+		var highlight = (function() {
+			var str = nsPreferences.copyUnicharPref('xwitter.highlight', '');
+			return str ? new RegExp(str.replace(/\W/g, '\\$&'), 'g') : null;
+		})();
 
-			$(_query.marker, element).attr('title', _statuses.length.toString(10));
+		return function(df) {
+			var elements = $(_query.status, df.firstChild);
+			df = null;
+			for (var i = elements.length; i--;) {
+				var element = elements[i];
 
-			var created_at = $(_query.created_at, element);
-			created_at.text( _dateParse(created_at.text()) );
+				$(_query.marker, element).attr('title', _statuses.length.toString(10));
 
-			var text = $(_query.text, element);
-			text.html(
-				_refChar(text.html()).
-				replace(/(@)(\w{1,20})/g, '$1<em class="account">$2</em>').
-				replace(/#\w+/g, '<em class="hash-tag">$&</em>').
-				replace(_matchUrl, '<em class="url">$1</em>').
-				replace(_highlight, '<em class="highlight">$&</em>')
-				);
+				var created_at = $(_query.created_at, element);
+				created_at.text( _dateParse(created_at.text()) );
+				created_at = null;
 
-			_statuses.push(element);
-		}
-	};
+				var text = $(_query.text, element);
+				text.html(
+					_refChar(text.html()).
+					replace(matchAccount, '$1<em class="account">$2</em>').
+					replace(matchHashTag, '<em class="hash-tag">$&</em>').
+					replace(_matchUrl, '<em class="url">$1</em>').
+					replace(highlight, '<em class="highlight">$&</em>')
+					);
+				text = null;
 
-	var _dateParse = function(created_at) {
-		var arr = created_at.split(/\s/);
-		var date = new Date([arr[1], arr[2] + ',', arr[5], arr[3]].join(' '));
-		date.setSeconds(date.getSeconds() + _timeOffset);
-		var h = date.getHours().zerofill(2);
-		var m = date.getMinutes().zerofill(2);
-		return isNaN(h) || isNaN(m) ? 'N/A' : [ h, m ].join(':');
-	};
+				_statuses.push(element);
+				element = null;
+			}
+			elements = null;
+		};
+	})();
+
+	var _dateParse = (function() {
+		var timeOffset = (function() {
+			var str = nsPreferences.copyUnicharPref('xwitter.timeOffset', '');
+			var match = /^([+\-])(\d{2}):(\d{2})$/.exec(str) || [];
+
+			if (match[1] && match[2] && match[3]) {
+				var sign = match[1];
+				var time = (parseInt(match[2], 10) + parseInt(match[3], 10) / 60) * 3600;
+
+				switch (sign) {
+				  case '+' : time = +time; break;
+				  case '-' : time = -time; break;
+				}
+			}
+			return time;
+		})() || 0;
+
+		return function(created_at) {
+			var arr = created_at.split(/\s/);
+			var date = new Date([arr[1], arr[2] + ',', arr[5], arr[3]].join(' '));
+
+			date.setSeconds(date.getSeconds() + timeOffset);
+
+			var h = date.getHours().zerofill(2);
+			var m = date.getMinutes().zerofill(2);
+			return isNaN(h) || isNaN(m) ? 'N/A' : [ h, m ].join(':');
+		};
+	})();
 
 	var _refChar = (function() {
 		var myReplacer = replacer({
@@ -231,42 +238,59 @@
 		};
 	})();
 
-	var _tokenize = function(value) {
-		var match = _matchCmd.exec(value) || [];
-		var colon = match[1];
-		var cmd   = match[2];
-		var index = match[3];
-		var text  = match[4];
-
-		if (!colon) { return false; }
-
-		if (index) {
-			index = parseInt(index, 10);
-			if (index >= _statuses.length) { return true; }
-
-			var element = _statuses[index], status_id = element.title;
-			switch (cmd) {
-			  case _cmds.destroy    : _destroy    ( element, status_id ); return true;
-			  case _cmds.fav        : _fav        ( element, status_id ); return true;
-			  case _cmds.findUrl    : _findUrl    ( element            ); return true;
-			  case _cmds.quoteTweet : _quoteTweet ( element, status_id ); return true;
-			  case _cmds.reply      : _reply      ( element, status_id ); return true;
-			  case _cmds.reTweet    : _reTweet    (          status_id ); return true;
+	var _tokenize = (function() {
+		var matchCmd = (function() {
+			var arr = [], obj = _cmds;
+			for (var prop in obj) {
+				arr.push(obj[prop]);
 			}
-		} else {
-			switch (cmd) {
-			  case _cmds.tl      : _changeMode ( _modes.tl            ); return true;
-			  case _cmds.mention : _changeMode ( _modes.mention       ); return true;
-			  case _cmds.user    : _changeMode ( _modes.user,    text ); return true;
-			  case _cmds.list    : _changeMode ( _modes.list,    text ); return true;
-			  case _cmds.search  : _changeMode ( _modes.search,  text ); return true;
-			  case _cmds.tag     : _tag(text); return true;
-			  case _cmds.rate    : _rate(); return true;
-			  case _cmds.flee    : _flee(); return true;
+			return new RegExp('^(:)(' + arr.join('|') + '|.*)(?:\\s+(\\d+))?(?:\\s+(.+))?$');
+		})();
+
+		return function(value) {
+			var match = matchCmd.exec(value) || [];
+			var colon = match[1];
+			var cmd   = match[2];
+			var index = match[3];
+			var text  = match[4];
+
+			if (!colon) {
+				return false;
 			}
-		}
-		return true;
-	};
+
+			if (index) {
+				index = parseInt(index, 10);
+				if (index >= _statuses.length) {
+					return true;
+				}
+
+				var element = _statuses[index];
+				var status_id = element.title;
+
+				switch (cmd) {
+				  case _cmds.destroy    : _destroy    ( element, status_id ); break;
+				  case _cmds.fav        : _fav        ( element, status_id ); break;
+				  case _cmds.findUrl    : _findUrl    ( element            ); break;
+				  case _cmds.quoteTweet : _quoteTweet ( element, status_id ); break;
+				  case _cmds.reply      : _reply      ( element, status_id ); break;
+				  case _cmds.reTweet    : _reTweet    (          status_id ); break;
+				}
+				element = null;
+			} else {
+				switch (cmd) {
+				  case _cmds.tl      : _changeMode ( _modes.tl            ); break;
+				  case _cmds.mention : _changeMode ( _modes.mention       ); break;
+				  case _cmds.user    : _changeMode ( _modes.user,    text ); break;
+				  case _cmds.list    : _changeMode ( _modes.list,    text ); break;
+				  case _cmds.search  : _changeMode ( _modes.search,  text ); break;
+				  case _cmds.tag     : _tag(text); break;
+				  case _cmds.rate    : _rate(); break;
+				  case _cmds.flee    : _flee(); break;
+				}
+			}
+			return true;
+		};
+	})();
 
 	var _shortenUrl = function(value) {
 		return value.replace(_matchUrl, function($_, $1) {
@@ -281,12 +305,15 @@
 			  }
 			});
 			var json = JSON.parse(xhr.responseText);
+			xhr = null;
 			return json.status_txt === 'OK' ? json.data.url : $1;
 		});
 	};
 
 	var _update = function(value) {
-		if (!value || _tokenize(value)) { return; }
+		if (!value || _tokenize(value)) {
+			return;
+		}
 
 		value += _footer;
 		if (value.length > 140) {
@@ -328,6 +355,7 @@
 		  data : OAuth.getParameterMap(message.parameters),
 		  success: function() {
 			  $(element).remove();
+			  element = null;
 		  }
 		});
 	};
@@ -346,6 +374,7 @@
 		  data : OAuth.getParameterMap(message.parameters),
 		  success: function() {
 			  element[ (favorited ? 'remove' : 'add') + 'Class' ](className);
+			  element = null;
 		  }
 		});
 	};
@@ -354,6 +383,8 @@
 		var ret = [];
 		$('em.url', element).each(function(index, element) {
 			var url = $(element).text();
+			element = null;
+
 			var xhr = $.ajax({
 			  async: false,
 			  type : 'GET',
@@ -369,12 +400,14 @@
 		_in_reply = status_id;
 		_textbox.val(' QT @' + $(_query.screen_name, element).text() + ': ' + $(_query.text, element).text()).
 		  focus();
+		element = null;
 	};
 
 	var _reply = function(element, status_id) {
 		_in_reply = status_id;
 		_textbox.val('@' + $(_query.screen_name, element).text() + ' ').
 		  focus();
+		element = null;
 	};
 
 	var _reTweet = function(status_id) {
@@ -418,18 +451,6 @@
 		$(_box).empty();
 	};
 
-	var _save = function(xml) {
-		var cc = Components.classes, ci = Components.interfaces, charset = 'utf-8';
-		var file = cc['@mozilla.org/file/directory_service;1'].getService(ci.nsIProperties).get('CurProcD', ci.nsIFile);
-		file = FileIO.open(FileIO.path(file).replace(/^file:\/\/\/?/, '').replace(new RegExp('/', 'g'), '\\') + '\\statuses.xml');
-		var str = file.exists() ? FileIO.read(file, charset) : '<statuses type="array"></statuses>';
-		var range = document.createRange(), oldDf = range.createContextualFragment(str); range.detach();
-		var newDf = xsltproc('chrome://xwitter/content/statuses.xsl').transformToFragment(xml, document);
-		var root = oldDf.firstChild;
-		root.insertBefore(newDf, root.firstChild);
-		FileIO.write(file, new XMLSerializer().serializeToString(root), null, charset);
-	};
-
 	// ================================================================================================================================
 
 	_changeMode(_modes.tl);
@@ -442,6 +463,7 @@
 				return;
 			}
 		}
+		event = null;
 	});
 
 	_textbox.keypress(function(event) {
@@ -458,6 +480,7 @@
 			event.preventDefault();
 			return;
 		}
+		event = null;
 	});
 
 	var _consumer_token = 'A6PRSyZO5Rsp5CE70y53ow';
@@ -479,10 +502,8 @@
 			OAuth.setParameter(that, 'oauth_token', _oauth_token);
 		}
 		var data = spec.data;
-		for (let prop in data) {
-			if (data.hasOwnProperty(prop)) {
-				OAuth.setParameter(that, prop, data[prop]);
-			}
+		for (var prop in data) {
+			OAuth.setParameter(that, prop, data[prop]);
 		}
 
 		OAuth.setTimestampAndNonce(that);
@@ -530,7 +551,7 @@
 				url  : 'https://api.twitter.com/oauth/authorize'
 			  });
 			  var win = window.open(OAuth.addToURL(message.action, message.parameters));
-			  var oauth_verifier = prompt('PIN').trim(); win.close();
+			  var oauth_verifier = prompt('PIN').trim(); win.close(); win = null;
 
 			  var message = _message({
 				type : 'POST',
@@ -553,8 +574,4 @@
 		  }
 		});
 	})();
-
-	// ================================================================================================================================
-
-	return that;
 };

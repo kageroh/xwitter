@@ -35,6 +35,7 @@ var xsltproc = function(path) {
 	doc.load(path);
 	var proc = new XSLTProcessor();
 	proc.importStylesheet(doc);
+	doc = null;
 	return proc;
 };
 
@@ -45,6 +46,7 @@ var Effects = {
 		  element.style.opacity = opacity = (opacity + gap < 1) ? opacity + gap : 1;
 		  if (opacity === 1) {
 			  clearInterval(tid);
+			  element = null;
 		  }
 	  } catch (e) { dump(e); } }, sec * gap * 1000);
   }
