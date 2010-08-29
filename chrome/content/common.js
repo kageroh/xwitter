@@ -46,7 +46,10 @@ $.ajax = (function() {
 	var _ajax = $.ajax;
 
 	return function(options) {
-		options.error = options.error || function(xhr, status, e) { dump(e); };
+		options.error = options.error || function(xhr, status, e) {
+			xhr = null;
+			dump(e);
+		};
 		return _ajax(options);
 	};
 })();
