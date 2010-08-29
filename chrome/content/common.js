@@ -1,10 +1,13 @@
-var _dump = dump;
-dump = function(o) {
-	if (o instanceof Error) {
-		['name', 'message', 'fileName', 'lineNumber', 'stack']
-		  .forEach(function(p) { _dump([p, ': ', o[p], '\n'].join('')); });
-	} else { _dump(o + '\n\n'); }
-};
+dump = (function() {
+	var _dump = dump;
+
+	return function(o) {
+		if (o instanceof Error) {
+			['name', 'message', 'fileName', 'lineNumber', 'stack']
+			  .forEach(function(p) { _dump([p, ': ', o[p], '\n'].join('')); });
+		} else { _dump(o + '\n\n'); }
+	};
+})();
 
 Number.prototype.zerofill = function(len) {
 	return ((1 << len).toString(2) + this).slice(-len);
@@ -39,11 +42,14 @@ var xsltproc = function(path) {
 	return proc;
 };
 
-var _ajax = $.ajax;
-$.ajax = function(options) {
-	options.error = function(xhr, status, e) { dump(e); };
-	return _ajax(options);
-};
+$.ajax = (function() {
+	var _ajax = $.ajax;
+
+	return function(options) {
+		options.error = options.error || function(xhr, status, e) { dump(e); };
+		return _ajax(options);
+	};
+})();
 
 var Effects = {
   fadeIn: function(element, sec) {
