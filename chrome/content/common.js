@@ -39,6 +39,12 @@ var xsltproc = function(path) {
 	return proc;
 };
 
+var _ajax = $.ajax;
+$.ajax = function(options) {
+	options.error = function(xhr, status, e) { dump(e); };
+	return _ajax(options);
+};
+
 var Effects = {
   fadeIn: function(element, sec) {
 	  var opacity = 0, gap = 0.1;
