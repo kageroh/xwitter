@@ -93,9 +93,9 @@ section.protected p {
 }
 
 section.retweeted p {
-  text-indent: 21px;
-  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAAOAgMAAABftKQkAAAACVBMVEUAAACqqqr///8jG4MMAAAAA3RSTlMA//9EUNYhAAAANklEQVQI12MQDQ0NdWAAEqEBMHLpqqUBDGErs4Bk1KrQpSARZDJqFZBcNW0liFy6NABFL9g0AKmmHHulzAUMAAAAAElFTkSuQmCC');
-  background-position: 1px 0;
+  text-indent: 19px;
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAIAQMAAADz31yPAAAABlBMVEXd3d3///+uIkqAAAAAAnRSTlP/AOW3MEoAAAAcSURBVAjXYzjDw9DGw8B8huE8BDEwHGxhOHAGAGDnCRA2Lk32AAAAAElFTkSuQmCC');
+  background-position: 2px 4px;
 }
 
 p.favorited {
