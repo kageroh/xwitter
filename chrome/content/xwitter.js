@@ -16,7 +16,6 @@
 		};
 	})();
 
-	var _tid; // setInterval ID
 	var _statuses = [];
 	var _in_reply = '';
 	var _q;
@@ -106,19 +105,25 @@
 		var atom2stats = xsltproc('chrome://xwitter/content/atom2stats.xsl');
 
 		return function() {
-			var data = {}, mode = _mode, url = _modeUrl;
+			var mode = _mode;
+			var url  = _modeUrl;
+			var key  = url + _subname;
 
-			if (since_id[url]) {
-				data.count = mode === _modes.list ? '' : '200';
-				data.since_id = since_id[url];
-			} else {
-				since_id[url] = '';
-			}
-
+			var data = {};
 			switch (mode) {
 			  case _modes.search:
 				data.q = _q;
 				break;
+			}
+			if (since_id[key]) {
+				data.since_id = since_id[key];
+				switch (mode) {
+				  case _modes.tl:
+				  case _modes.mentions:
+				  case _modes.user:
+					data.count = '200';
+					break;
+				}
 			}
 
 			var message = _message({
@@ -130,34 +135,38 @@
 			  type : message.method,
 			  url  : message.action,
 			  data : OAuth.getParameterMap(message.parameters),
-			  success: function(data, status, xhr) {
-				  var xml = xhr.responseXML;
-				  xhr = null;
+			  success: (function() {
+				  var myMode = mode;
+				  var myUrl  = url;
+				  var myKey  = key;
 
-				  switch (mode) {
-					case _modes.search:
-					  xml = atom2stats.transformToFragment(xml, document);
-					  break;
-				  }
+				  return function(data, status, xhr) {
+					  var xml = xhr.responseXML;
+					  xhr = null;
 
-				  var df = myXsltproc.transformToFragment(xml, document);
-				  xml = null;
+					  switch (myMode) {
+						case _modes.search:
+						  xml = atom2stats.transformToFragment(xml, document);
+						  break;
+					  }
 
-				  if (!(df.firstChild instanceof HTMLBodyElement)) {
-					  return;
-				  }
+					  var df = myXsltproc.transformToFragment(xml, document);
+					  xml = null;
 
-				  _transform(df);
-				  since_id[url] = _statuses[_statuses.length - 1].title;
+					  if (!(df.firstChild instanceof HTMLBodyElement)) {
+						  return;
+					  }
 
-				  _box.insertBefore(df, _box.firstChild);
-				  df = null;
+					  _transform(df);
+					  since_id[key] = _statuses[_statuses.length - 1].title;
 
-				  Effects.fadeIn(_box.firstChild, 0.5);
-			  }
+					  _box.insertBefore(df, _box.firstChild);
+					  df = null;
+
+					  Effects.fadeIn(_box.firstChild, 0.5);
+				  };
+			  })()
 			});
-
-			return arguments.callee;
 		};
 	})();
 
@@ -285,6 +294,7 @@
 				}
 				element = null;
 			} else {
+				if (text) { text = text.trim(); }
 				switch (cmd) {
 				  case _cmds.tl      : _changeMode ( _modes.tl            ); break;
 				  case _cmds.mention : _changeMode ( _modes.mention       ); break;
@@ -533,7 +543,10 @@
 	};
 
 	var _init = function() {
-		setInterval(_refresh(), 15 * 1000);
+		(function() {
+			_refresh();
+			setTimeout(arguments.callee, 15 * 1000);
+		})();
 	};
 
 	(function() {

@@ -8,7 +8,6 @@
   <xsl:output method="xml"
 	encoding="utf-8"
 	omit-xml-declaration="no"
-	doctype-system=""
 	indent="no"
 	media-type="application/xhtml+xml" />
 
