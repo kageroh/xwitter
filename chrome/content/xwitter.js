@@ -160,8 +160,7 @@
 
 					  _transform(df);
 					  var element = _statuses[ _statuses.length - 1 ];
-					  since_id[myKey] = element.title.replace(
-						  $(element).hasClass('retweeted') ? /\d+$/ : /^\d+/, '$&');
+					  since_id[myKey] = element.title.replace(/\d+$/, '$&');
 					  element = null;
 
 					  _box.insertBefore(df, _box.firstChild);
