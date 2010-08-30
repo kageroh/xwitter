@@ -1,4 +1,6 @@
 ﻿var xwitter = function() {
+	var _limit = nsPreferences.getIntPref('xwitter.limit', 350);
+
 	var _subname = '';
 	var _footer = '';
 
@@ -167,7 +169,7 @@
 				  };
 			  })(),
 			  complete: function() {
-				  setTimeout(_refresh, 3600 / 350 * 1000);
+				  setTimeout(_refresh, 3600 / _limit * 1000);
 			  }
 			});
 		};

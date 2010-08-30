@@ -60,37 +60,6 @@ $.ajax = (function() {
 	};
 })();
 
-/* $.ajax = function(options) {
-	var xhr = new XMLHttpRequest();
-	xhr.onreadystatechange = function() { try {
-		if (xhr.readyState !== 4 || xhr.status !== 200) { return; }
-		if (!options.success) { return; }
-		var data = xhr.responseText;
-		try { data = JSON.parse(data); } catch (e) {}
-		options.success(data, options.dataType, xhr);
-	} catch (e) { dump(e); } };
-
-	options.type = options.type.toUpperCase();
-
-	if (options.data) {
-		var pairs = [], data = options.data;
-		for (var prop in data) {
-			pairs.push([prop, encodeURIComponent(data[prop])].join('='));
-		}
-		options.data = pairs.join('&');
-		if (options.type === 'GET') {
-			(options.url += '?' + options.data);
-		}
-	}
-
-	xhr.open(options.type, options.url, typeof options.async === 'undefined' ? true : options.async);
-	if (options.type === 'POST') {
-		xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-	}
-	xhr.send(options.data || null);
-	return xhr;
-}; */
-
 var Effects = {
   fadeIn: function(element, sec) {
 	  var opacity = 0, gap = 0.1;
