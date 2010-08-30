@@ -168,10 +168,7 @@
 
 					  Effects.fadeIn(_box.firstChild, 500);
 				  };
-			  })(),
-			  complete: function() {
-				  setTimeout(_refresh, _limit);
-			  }
+			  })()
 			});
 		};
 	})();
@@ -549,7 +546,10 @@
 	};
 
 	var _init = function() {
-		_refresh();
+		(function() {
+			setTimeout(arguments.callee, _limit);
+			_refresh();
+		})();
 	};
 
 	(function() {
