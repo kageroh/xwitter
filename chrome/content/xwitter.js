@@ -405,9 +405,12 @@
 	};
 
 	var _quoteTweet = function(element, status_id) {
+		if ($(element).hasClass('protected')) {
+			return;
+		}
+
 		_in_reply = status_id;
-		var screen_name = $(element).hasClass('protected') ? '<censored>' : $(_query.screen_name, element).text();
-		_textbox_.val(' QT @' + screen_name + ': ' + $(_query.text, element).text()).
+		_textbox_.val(' QT @' + $(_query.screen_name, element).text() + ': ' + $(_query.text, element).text()).
 		  focus();
 		element = null;
 	};
