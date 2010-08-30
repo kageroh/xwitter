@@ -1,5 +1,5 @@
 ﻿var xwitter = function() {
-	var _limit = nsPreferences.getIntPref('xwitter.limit', 350);
+	var _limit = 3600 / nsPreferences.getIntPref('xwitter.limit', 350) * 1000;
 
 	var _subname = '';
 	var _footer = '';
@@ -139,7 +139,6 @@
 			  data : OAuth.getParameterMap(message.parameters),
 			  success: (function() {
 				  var myMode = mode;
-				  var myUrl  = url;
 				  var myKey  = key;
 
 				  return function(data, dataType, xhr) {
@@ -160,16 +159,19 @@
 					  }
 
 					  _transform(df);
-					  since_id[key] = _statuses[_statuses.length - 1].title;
+					  var element = _statuses[ _statuses.length - 1 ];
+					  since_id[myKey] = element.title.replace(
+						  $(element).hasClass('retweeted') ? /\d+$/ : /^\d+/, '$&');
+					  element = null;
 
 					  _box.insertBefore(df, _box.firstChild);
 					  df = null;
 
-					  Effects.fadeIn(_box.firstChild, 0.5);
+					  Effects.fadeIn(_box.firstChild, 500);
 				  };
 			  })(),
 			  complete: function() {
-				  setTimeout(_refresh, 3600 / _limit * 1000);
+				  setTimeout(_refresh, _limit);
 			  }
 			});
 		};
@@ -286,7 +288,7 @@
 				}
 
 				var element = _statuses[index];
-				var status_id = element.title;
+				var status_id = element.title.replace(/^\d+/, '$&');
 
 				switch (cmd) {
 				  case _cmds.destroy    : _destroy    ( element, status_id ); break;

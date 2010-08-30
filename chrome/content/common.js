@@ -19,11 +19,10 @@ var $S = function(selector, context) { return (context || document).querySelecto
 var replacer = function(conv) {
 	var str = '';
 	for (var k in conv) {
-		if (conv.hasOwnProperty(k)) {
-			str += (str.length ? '|' : '') + k;
-		}
+		str += (str.length ? '|' : '') + k;
 	}
 	var regexp = new RegExp(str, 'g');
+
 	return function(s) {
 		return s.replace(regexp, function($_) {
 			var a = conv[$_];
@@ -42,7 +41,7 @@ var xsltproc = function(path) {
 	return proc;
 };
 
-$.ajax = (function() {
+/* $.ajax = (function() {
 	var _ajax = $.ajax;
 
 	return function(options) {
@@ -58,10 +57,43 @@ $.ajax = (function() {
 
 		return _ajax(options);
 	};
-})();
+})(); */
+
+$.ajax = function(options) {
+	var xhr = new XMLHttpRequest();
+	xhr.onreadystatechange = function() { try {
+		if (xhr.readyState !== 4 || xhr.status !== 200) { return; }
+		if (!options.success) { return; }
+		var data = xhr.responseText;
+		try { data = JSON.parse(data); } catch (e) {}
+		options.success(data, options.dataType, xhr);
+		if (!options.complete) { return; }
+		options.complete(xhr);
+	} catch (e) { dump(e); } };
+
+	options.type = options.type.toUpperCase();
+
+	if (options.data) {
+		var pairs = [], data = options.data;
+		for (var prop in data) {
+			pairs.push([prop, encodeURIComponent(data[prop])].join('='));
+		}
+		options.data = pairs.join('&');
+		if (options.type === 'GET') {
+			(options.url += '?' + options.data);
+		}
+	}
+
+	xhr.open(options.type, options.url, typeof options.async === 'undefined' ? true : options.async);
+	if (options.type === 'POST') {
+		xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+	}
+	xhr.send(options.data || null);
+	return xhr;
+};
 
 var Effects = {
-  fadeIn: function(element, sec) {
+  fadeIn: function(element, ms) {
 	  var opacity = 0, gap = 0.1;
 	  var tid = setInterval(function() { try {
 		  element.style.opacity = opacity = (opacity + gap < 1) ? opacity + gap : 1;
@@ -69,6 +101,6 @@ var Effects = {
 			  clearInterval(tid);
 			  element = null;
 		  }
-	  } catch (e) { dump(e); } }, sec * gap * 1000);
+	  } catch (e) { dump(e); } }, ms * gap);
   }
 };

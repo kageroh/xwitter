@@ -22,6 +22,7 @@
 	  <xsl:when test="retweeted_status">
 		<xsl:call-template name="status">
 		  <xsl:with-param name="cur" select="retweeted_status" />
+		  <xsl:with-param name="id" select="id" />
 		</xsl:call-template>
 	  </xsl:when>
 	  <xsl:otherwise>
@@ -32,7 +33,15 @@
 
   <xsl:template name="status">
 	<xsl:param name="cur" select="." />
-	<section title="{$cur/id}">
+	<xsl:param name="id" />
+	<section>
+	  <xsl:attribute name="title">
+		<xsl:value-of select="$cur/id" />
+		<xsl:if test="$id">
+		  <xsl:text> </xsl:text>
+		  <xsl:value-of select="$id" />
+		</xsl:if>
+	  </xsl:attribute>
 	  <xsl:attribute name="class">
 		<xsl:choose>
 		  <xsl:when test="$cur/user/protected = 'true'">protected</xsl:when>
