@@ -140,7 +140,7 @@
 				  var myUrl  = url;
 				  var myKey  = key;
 
-				  return function(data, status, xhr) {
+				  return function(data, dataType, xhr) {
 					  var xml = xhr.responseXML;
 					  xhr = null;
 
@@ -165,7 +165,10 @@
 
 					  Effects.fadeIn(_box.firstChild, 0.5);
 				  };
-			  })()
+			  })(),
+			  complete: function() {
+				  setTimeout(_refresh, 3600 / 350 * 1000);
+			  }
 			});
 		};
 	})();
@@ -543,10 +546,7 @@
 	};
 
 	var _init = function() {
-		(function() {
-			_refresh();
-			setTimeout(arguments.callee, 15 * 1000);
-		})();
+		_refresh();
 	};
 
 	(function() {
