@@ -46,10 +46,16 @@ $.ajax = (function() {
 	var _ajax = $.ajax;
 
 	return function(options) {
-		options.error = options.error || function(xhr, status, e) {
-			xhr = null;
-			dump(e);
-		};
+		options.error = (function() {
+			var _error = options.error;
+
+			return function(xhr, status, e) {
+				xhr = null;
+				_error();
+				dump(e);
+			};
+		})();
+
 		return _ajax(options);
 	};
 })();

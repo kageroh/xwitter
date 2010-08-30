@@ -21,7 +21,8 @@
 	var _q;
 
 	var _box = $s('#statuses');
-	var _textbox = $('#status');
+	var _box_ = $(_box);
+	var _textbox_ = $('#status');
 
 	var _query = {
 		status      : 'section',
@@ -246,6 +247,9 @@
 			}
 			return new RegExp('^(:)(' + arr.join('|') + '|.*)(?:\\s+(\\d+))?(?:\\s+(.+))?$');
 		})();
+		var findScreenName = function(element) {
+			return $(_query.screen_name, element).text();
+		};
 
 		return function(value) {
 			var match = matchCmd.exec(value) || [];
@@ -274,6 +278,7 @@
 				  case _cmds.quoteTweet : _quoteTweet ( element, status_id ); break;
 				  case _cmds.reply      : _reply      ( element, status_id ); break;
 				  case _cmds.reTweet    : _reTweet    (          status_id ); break;
+				  case _cmds.user: _changeMode(_modes.user, findScreenName(element)); break;
 				}
 				element = null;
 			} else {
@@ -319,7 +324,7 @@
 		if (value.length > 140) {
 			value = _shortenUrl(value);
 			if (value.length > 140) {
-				_textbox.select();
+				_textbox_.select();
 				return;
 			}
 		}
@@ -392,20 +397,20 @@
 			});
 			ret.push(JSON.parse(xhr.responseText).url || url);
 		});
-		_textbox.val(ret.join(' ')).
+		_textbox_.val(ret.join(' ')).
 		  select();
 	};
 
 	var _quoteTweet = function(element, status_id) {
 		_in_reply = status_id;
-		_textbox.val(' QT @' + $(_query.screen_name, element).text() + ': ' + $(_query.text, element).text()).
+		_textbox_.val(' QT @' + $(_query.screen_name, element).text() + ': ' + $(_query.text, element).text()).
 		  focus();
 		element = null;
 	};
 
 	var _reply = function(element, status_id) {
 		_in_reply = status_id;
-		_textbox.val('@' + $(_query.screen_name, element).text() + ' ').
+		_textbox_.val('@' + $(_query.screen_name, element).text() + ' ').
 		  focus();
 		element = null;
 	};
@@ -437,7 +442,7 @@
 		  url  : message.action,
 		  data : OAuth.getParameterMap(message.parameters),
 		  success: function(data) {
-			  _textbox.val([
+			  _textbox_.val([
 				  data.remaining_hits,
 				  data.hourly_limit
 				  ].join('/')).
@@ -448,7 +453,7 @@
 
 	var _flee = function() {
 		_statuses.length = 0;
-		$(_box).empty();
+		_box_.empty();
 	};
 
 	// ================================================================================================================================
@@ -466,17 +471,22 @@
 		event = null;
 	});
 
-	_textbox.keypress(function(event) {
+	_box_.mousedown(function() {
+		_textbox_.blur();
+		_box_.focus();
+	});
+
+	_textbox_.keypress(function(event) {
 		switch (event.keyCode) {
 		  case KeyEvent.DOM_VK_RETURN:
 		  case KeyEvent.DOM_VK_ENTER:
-			var value = _textbox.val();
-			_textbox.val('');
+			var value = _textbox_.val();
+			_textbox_.val('');
 			_update(value);
 			return;
 		  case KeyEvent.DOM_VK_TAB:
-			_textbox.blur();
-			_box.focus();
+			_textbox_.blur();
+			_box_.focus();
 			event.preventDefault();
 			return;
 		}
@@ -516,12 +526,10 @@
 	};
 
 	var _init = function() {
-		var ms = 15 * 1000;
-		var fn = function() {
+		(function() {
 			_refresh();
-			setTimeout(fn, ms);
-		};
-		fn();
+			setTimeout(arguments.callee, 15 * 1000);
+		})();
 	};
 
 	(function() {
