@@ -93,8 +93,9 @@ section.protected p {
 }
 
 section.retweeted p {
-  text-indent: 20px;
+  text-indent: 21px;
   background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAAOAgMAAABftKQkAAAACVBMVEUAAACqqqr///8jG4MMAAAAA3RSTlMA//9EUNYhAAAANklEQVQI12MQDQ0NdWAAEqEBMHLpqqUBDGErs4Bk1KrQpSARZDJqFZBcNW0liFy6NABFL9g0AKmmHHulzAUMAAAAAElFTkSuQmCC');
+  background-position: 1px 0;
 }
 
 p.favorited {
