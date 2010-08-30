@@ -16,6 +16,7 @@
 		};
 	})();
 
+	var _tid; // setInterval ID
 	var _statuses = [];
 	var _in_reply = '';
 	var _q;
@@ -155,6 +156,8 @@
 				  Effects.fadeIn(_box.firstChild, 0.5);
 			  }
 			});
+
+			return arguments.callee;
 		};
 	})();
 
@@ -403,7 +406,8 @@
 
 	var _quoteTweet = function(element, status_id) {
 		_in_reply = status_id;
-		_textbox_.val(' QT @' + $(_query.screen_name, element).text() + ': ' + $(_query.text, element).text()).
+		var screen_name = $(element).hasClass('protected') ? '<censored>' : $(_query.screen_name, element).text();
+		_textbox_.val(' QT @' + screen_name + ': ' + $(_query.text, element).text()).
 		  focus();
 		element = null;
 	};
@@ -526,10 +530,7 @@
 	};
 
 	var _init = function() {
-		(function() {
-			_refresh();
-			setTimeout(arguments.callee, 15 * 1000);
-		})();
+		setInterval(_refresh(), 15 * 1000);
 	};
 
 	(function() {

@@ -19,28 +19,46 @@
   </xsl:template>
 
   <xsl:template match="status">
-	<section title="{id}">
-	  <xsl:if test="user/protected = 'true'">
-		<xsl:attribute name="class">protected</xsl:attribute>
-	  </xsl:if>
-	  <img src="{regexp:replace(user/profile_image_url, '^(.+_)normal(\..+)$', '', '$1mini$2')}" alt="" />
+	<xsl:choose>
+	  <xsl:when test="retweeted_status">
+		<xsl:call-template name="status">
+		  <xsl:with-param name="cur" select="retweeted_status" />
+		</xsl:call-template>
+	  </xsl:when>
+	  <xsl:otherwise>
+		<xsl:call-template name="status" />
+	  </xsl:otherwise>
+	</xsl:choose>
+  </xsl:template>
+
+  <xsl:template name="status">
+	<xsl:param name="cur" select="." />
+	<section title="{$cur/id}">
+	  <xsl:attribute name="class">
+		<xsl:choose>
+		  <xsl:when test="$cur/user/protected = 'true'">protected</xsl:when>
+		  <xsl:when test="local-name($cur) = 'retweeted_status'">retweeted</xsl:when>
+		  <xsl:otherwise />
+		</xsl:choose>
+	  </xsl:attribute>
+	  <img src="{regexp:replace($cur/user/profile_image_url, '^(.+_)normal(\..+)$', '', '$1mini$2')}" alt="" />
 	  <div class="meta">
 		<header>
-		  <h1><xsl:value-of select="user/screen_name" /></h1>
+		  <h1><xsl:value-of select="$cur/user/screen_name" /></h1>
 		</header>
 		<footer>
-		  <time><xsl:value-of select="created_at" /></time>
+		  <time><xsl:value-of select="$cur/created_at" /></time>
 		  <xsl:text>via </xsl:text>
 		  <em class="source">
-			<xsl:value-of select="regexp:replace(source, '^&lt;a [^&gt;]+&gt;(.+)&lt;/a&gt;$', '', '$1')" />
+			<xsl:value-of select="regexp:replace($cur/source, '^&lt;a [^&gt;]+&gt;(.+)&lt;/a&gt;$', '', '$1')" />
 		  </em>
 		</footer>
 	  </div>
 	  <p>
-		<xsl:if test="favorited = 'true'">
+		<xsl:if test="$cur/favorited = 'true'">
 		  <xsl:attribute name="class">favorited</xsl:attribute>
 		</xsl:if>
-		<xsl:value-of select="text" />
+		<xsl:value-of select="$cur/text" />
 	  </p>
 	</section>
   </xsl:template>
