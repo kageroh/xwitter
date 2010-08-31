@@ -11,7 +11,8 @@
 xul|box#statuses {
   color: #d0d0d0;
   background-color: #00283c;
-  height: 70.5em;
+  width: 480px;
+  height: 800px;
   overflow: auto;
   -moz-user-select: text;
   -moz-box-orient: vertical;
@@ -19,7 +20,7 @@ xul|box#statuses {
 
 div.meta,
 p {
-  width: 24.5em;
+  width: 420px;
 }
 
 xul|textbox#status,
