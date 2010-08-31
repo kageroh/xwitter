@@ -22,16 +22,15 @@ var xwitter = function() {
 	var _in_reply = '';
 	var _q;
 
-	var _box = $s('#statuses');
-	var _box_ = $(_box);
-	var _textbox_ = $('#status');
+	var _box = $s('#statuses > html');
+	var _textbox = $s('#status');
 
 	var _query = {
 		status      : 'section',
-		marker      : 'header:first',
-		created_at  : 'time:first',
-		screen_name : 'h1:first',
-		text        : 'p:first'
+		marker      : 'header',
+		created_at  : 'time',
+		screen_name : 'h1',
+		text        : 'p'
 	};
 
 	var _cmds = {
@@ -54,7 +53,7 @@ var xwitter = function() {
 	var _matchId  = /^(\d+)\s(\d+)?$/;
 	var _matchUrl = /(https?:\/\/[\-_.!~*\'()\w;\/?:\@&=+\$,%#]+)/g;
 
-	// ================================================================================================================================
+	// ================================================================
 
 	var _modes = {
 	  tl      : 'tl',
@@ -134,41 +133,29 @@ var xwitter = function() {
 			  url  : url,
 			  data : data
 			});
-			$.ajax({
+			Ajax.request({
 			  type : message.method,
 			  url  : message.action,
 			  data : OAuth.getParameterMap(message.parameters),
-			  success: (function() {
-				  var myMode = mode;
-				  var myKey  = key;
+			  dataType: 'xml',
+			  success: function(data) {
+				  var xml = data;
+				  switch (mode) {
+					case _modes.search:
+					  xml = atom2stats.transformToFragment(xml, document);
+					  break;
+				  }
+				  var df = myXsltproc.transformToFragment(xml, document);
+				  if (!(df.firstChild instanceof HTMLBodyElement)) {
+					  return;
+				  }
 
-				  return function(data, dataType, xhr) {
-					  var xml = xhr.responseXML;
-					  xhr = null;
-
-					  switch (myMode) {
-						case _modes.search:
-						  xml = atom2stats.transformToFragment(xml, document);
-						  break;
-					  }
-
-					  var df = myXsltproc.transformToFragment(xml, document);
-					  xml = null;
-
-					  if (!(df.firstChild instanceof HTMLBodyElement)) {
-						  return;
-					  }
-
-					  _transform(df);
-					  since_id[myKey] = _statuses[ _statuses.length - 1 ].title.replace(
-						  _matchId, function($_, $1, $2) { return $2 || $1; });
-
-					  _box.insertBefore(df, _box.firstChild);
-					  df = null;
-
-					  Effects.fadeIn(_box.firstChild, 500);
-				  };
-			  })()
+				  _transform(df);
+				  since_id[key] = _statuses[ _statuses.length - 1 ].title.replace(
+					  _matchId, function($_, $1, $2) { return $2 || $1; });
+				  _box.insertBefore(df, _box.firstChild);
+				  Effects.fadeIn(_box.firstChild, 500);
+			  }
 			});
 		};
 	})();
@@ -182,31 +169,25 @@ var xwitter = function() {
 		})();
 
 		return function(df) {
-			var elements = $(_query.status, df.firstChild);
-			df = null;
+			var elements = $S(_query.status, df.firstChild);
 			for (var i = elements.length; i--;) {
 				var element = elements[i];
 
-				$(_query.marker, element).attr('title', _statuses.length.toString(10));
+				$s(_query.marker, element).title = _statuses.length.toString(10);
 
-				var created_at = $(_query.created_at, element);
-				created_at.text( _dateParse(created_at.text()) );
-				created_at = null;
+				var created_at = $s(_query.created_at, element);
+				created_at.textContent = _dateParse(created_at.textContent);
 
-				var text = $(_query.text, element);
-				text.html(
-					_refChar(text.html()).
-					replace(matchAccount, '$1<em class="account">$2</em>').
+				var text = $s(_query.text, element);
+				text.textContent = _refChar(text.textContent);
+				text.innerHTML = text.innerHTML.
+				  replace(matchAccount, '$1<em class="account">$2</em>').
 					replace(matchHashTag, '<em class="hash-tag">$&</em>').
-					replace(_matchUrl, '<em class="url">$1</em>').
-					replace(highlight, '<em class="highlight">$&</em>')
-					);
-				text = null;
+					  replace(_matchUrl, '<em class="url">$1</em>').
+						replace(highlight, '<em class="highlight">$&</em>');
 
 				_statuses.push(element);
-				element = null;
 			}
-			elements = null;
 		};
 	})();
 
@@ -263,7 +244,7 @@ var xwitter = function() {
 			return new RegExp('^(:)(' + arr.join('|') + '|.*)(?:\\s+(\\d+))?(?:\\s+(.+))?$');
 		})();
 		var findScreenName = function(element) {
-			return $(_query.screen_name, element).text();
+			return $s(_query.screen_name, element).textContent;
 		};
 
 		return function(value) {
@@ -295,7 +276,6 @@ var xwitter = function() {
 				  case _cmds.reTweet    : _reTweet    (          status_id ); break;
 				  case _cmds.user: _changeMode(_modes.user, findScreenName(element)); break;
 				}
-				element = null;
 			} else {
 				if (text) { text = text.trim(); }
 				switch (cmd) {
@@ -315,7 +295,7 @@ var xwitter = function() {
 
 	var _shortenUrl = function(value) {
 		return value.replace(_matchUrl, function($_, $1) {
-			var xhr = $.ajax({
+			var xhr = Ajax.request({
 			  async: false,
 			  type : 'GET',
 			  url  : 'http://api.bit.ly/v3/shorten',
@@ -323,10 +303,10 @@ var xwitter = function() {
 				login   : 'kageroh',
 				apiKey  : 'R_8a4f42906456aa208ea827950cd378ad',
 				longUrl : $1
-			  }
+			  },
+			  dataType: 'json'
 			});
 			var json = JSON.parse(xhr.responseText);
-			xhr = null;
 			return json.status_txt === 'OK' ? json.data.url : $1;
 		});
 	};
@@ -340,7 +320,7 @@ var xwitter = function() {
 		if (value.length > 140) {
 			value = _shortenUrl(value);
 			if (value.length > 140) {
-				_textbox_.select();
+				_textbox.select();
 				return;
 			}
 		}
@@ -358,10 +338,11 @@ var xwitter = function() {
 		  url  : 'https://api.twitter.com/1/statuses/update.json',
 		  data : data
 		});
-		$.ajax({
+		Ajax.request({
 		  type : message.method,
 		  url  : message.action,
-		  data : OAuth.getParameterMap(message.parameters)
+		  data : OAuth.getParameterMap(message.parameters),
+		  dataType: 'json'
 		});
 	};
 
@@ -370,69 +351,80 @@ var xwitter = function() {
 		  type : 'POST',
 		  url  : ['https://api.twitter.com/1/statuses/destroy/', status_id, '.json'].join('')
 		});
-		$.ajax({
+		Ajax.request({
 		  type : message.method,
 		  url  : message.action,
 		  data : OAuth.getParameterMap(message.parameters),
+		  dataType: 'json',
 		  success: function() {
-			  $(element).remove();
-			  element = null;
+			  element.parentNode.removeChild(element);
 		  }
 		});
 	};
 
 	var _fav = function(element, status_id) {
-		element = $(_query.text, element);
-		var className = 'favorited', favorited = element.hasClass(className);
+		element = $s(_query.text, element);
+		var className = 'favorited', favorited = Element.hasClassName(element, className);
 
 		var message = _message({
 		  type : 'POST',
-		  url  : ['https://api.twitter.com/1/favorites/', favorited ? 'destroy' : 'create', '/', status_id, '.json'].join('')
+		  url  : [
+			  'https://api.twitter.com/1/favorites/',
+			  favorited ? 'destroy' : 'create',
+			  '/', status_id, '.json'
+			  ].join('')
 		});
-		$.ajax({
+		Ajax.request({
 		  type : message.method,
 		  url  : message.action,
 		  data : OAuth.getParameterMap(message.parameters),
+		  dataType: 'json',
 		  success: function() {
-			  element[ (favorited ? 'remove' : 'add') + 'Class' ](className);
-			  element = null;
+			  Element[ (favorited ? 'remove' : 'add') + 'ClassName' ](element, className);
 		  }
 		});
 	};
 
 	var _findUrl = function(element) {
 		var ret = [];
-		$('em.url', element).each(function(index, element) {
-			var url = $(element).text();
-			element = null;
-
-			var xhr = $.ajax({
+		var elements = $S('em.url', element);
+		for (var i = 0, len = elements.length; i < len; i++) {
+			var url = elements[i].textContent;
+			var xhr = Ajax.request({
 			  async: false,
 			  type : 'GET',
-			  url  : 'http://ss-o.net/api/reurl.json?url=' + encodeURIComponent(url)
+			  url  : 'http://ss-o.net/api/reurl.json',
+			  data : {
+				url: url
+			  },
+			  dataType: 'json'
 			});
 			ret.push(JSON.parse(xhr.responseText).url || url);
-		});
-		_textbox_.val(ret.join(' ')).
-		  select();
+		}
+		_textbox.value = ret.join(' ');
+		_textbox.select();
 	};
 
 	var _quoteTweet = function(element, status_id) {
-		if ($(element).hasClass('protected')) {
+		if (Element.hasClassName(element, 'protected')) {
 			return;
 		}
 
 		_in_reply = status_id;
-		_textbox_.val(' QT @' + $(_query.screen_name, element).text() + ': ' + $(_query.text, element).text()).
-		  focus();
-		element = null;
+		_textbox.value = [
+			' QT @', $s(_query.screen_name, element).textContent,
+			': ', $s(_query.text, element).textContent
+			].join('');
+		_textbox.focus();
 	};
 
 	var _reply = function(element, status_id) {
 		_in_reply = status_id;
-		_textbox_.val('@' + $(_query.screen_name, element).text() + ' ').
-		  focus();
-		element = null;
+		_textbox.value = [
+			'@', $s(_query.screen_name, element).textContent,
+			' '
+			].join('');
+		_textbox.focus();
 	};
 
 	var _reTweet = function(status_id) {
@@ -440,10 +432,11 @@ var xwitter = function() {
 		  type : 'POST',
 		  url  : ['https://api.twitter.com/1/statuses/retweet/', status_id, '.json'].join('')
 		});
-		$.ajax({
+		Ajax.request({
 		  type : message.method,
 		  url  : message.action,
-		  data : OAuth.getParameterMap(message.parameters)
+		  data : OAuth.getParameterMap(message.parameters),
+		  dataType: 'json'
 		});
 	};
 
@@ -457,30 +450,28 @@ var xwitter = function() {
 		  type : 'GET',
 		  url  : 'https://api.twitter.com/1/account/rate_limit_status.json'
 		});
-		$.ajax({
+		Ajax.request({
 		  type : message.method,
 		  url  : message.action,
 		  data : OAuth.getParameterMap(message.parameters),
+		  dataType: 'json',
 		  success: function(data) {
-			  _textbox_.val([
-				  data.remaining_hits,
-				  data.hourly_limit
-				  ].join('/')).
-				select();
+			  _textbox.value = [ data.remaining_hits, data.hourly_limit ].join('/');
+			  _textbox.select();
 		  }
 		});
 	};
 
 	var _flee = function() {
 		_statuses.length = 0;
-		_box_.empty();
+		_box.innerHTML = '';
 	};
 
-	// ================================================================================================================================
+	// ================================================================
 
 	_changeMode(_modes.tl);
 
-	$(window).keydown(function(event) {
+	Events.bind(window, 'keydown', function(event) {
 		if (event.ctrlKey) {
 			switch (event.keyCode) {
 			  case KeyEvent.DOM_VK_W:
@@ -488,29 +479,27 @@ var xwitter = function() {
 				return;
 			}
 		}
-		event = null;
 	});
 
-	_box_.mousedown(function() {
-		_textbox_.blur();
-		_box_.focus();
+	Events.bind(_box, 'mousedown', function() {
+		_textbox.blur();
+		_box.focus();
 	});
 
-	_textbox_.keypress(function(event) {
+	Events.bind(_textbox, 'keypress', function(event) {
 		switch (event.keyCode) {
 		  case KeyEvent.DOM_VK_RETURN:
 		  case KeyEvent.DOM_VK_ENTER:
-			var value = _textbox_.val();
-			_textbox_.val('');
+			var value = _textbox.value;
+			_textbox.value = '';
 			_update(value);
 			return;
 		  case KeyEvent.DOM_VK_TAB:
-			_textbox_.blur();
-			_box_.focus();
+			_textbox.blur();
+			_box.focus();
 			event.preventDefault();
 			return;
 		}
-		event = null;
 	});
 
 	var _consumer_token = 'A6PRSyZO5Rsp5CE70y53ow';
@@ -565,10 +554,11 @@ var xwitter = function() {
 		  type : 'GET',
 		  url  : 'https://api.twitter.com/oauth/request_token'
 		});
-		$.ajax({
+		Ajax.request({
 		  type : message.method,
 		  url  : message.action,
 		  data : OAuth.getParameterMap(message.parameters),
+		  dataType: 'text',
 		  success: function(data) {
 			  var res = data;
 			  _oauth_token        = ( re_token.exec(res)        || [] )[1];
@@ -579,17 +569,18 @@ var xwitter = function() {
 				url  : 'https://api.twitter.com/oauth/authorize'
 			  });
 			  var win = window.open(OAuth.addToURL(message.action, message.parameters));
-			  var oauth_verifier = prompt('PIN').trim(); win.close(); win = null;
+			  var oauth_verifier = prompt('PIN').trim(); win.close();
 
 			  var message = _message({
 				type : 'POST',
 				url  : 'https://api.twitter.com/oauth/access_token',
 				data : { 'oauth_verifier': oauth_verifier }
 			  });
-			  $.ajax({
+			  Ajax.request({
 				type : message.method,
 				url  : message.action,
 				data : OAuth.getParameterMap(message.parameters),
+				dataType: 'text',
 				success: function(data) {
 					var res = data;
 					_oauth_token        = ( re_token.exec(res)        || [] )[1];
