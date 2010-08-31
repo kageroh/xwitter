@@ -1,4 +1,4 @@
-var xwitter = function() {
+﻿var xwitter = function() {
 	var _limit = 3600 / nsPreferences.getIntPref('xwitter.limit', 350) * 1000;
 
 	var _subname = '';
@@ -37,8 +37,8 @@ var xwitter = function() {
 	  destroy    : 'del',
 	  fav        : 'fav',
 	  findUrl    : 'url',
-	  search     : 'f',
 	  flee       : 'flee',
+	  fav_rt     : 'fnr',
 	  list       : 'list',
 	  mention    : 'men',
 	  quoteTweet : 'qt',
@@ -47,6 +47,7 @@ var xwitter = function() {
 	  reTweet    : 'rt',
 	  tag        : 'tag',
 	  tl         : 'tl',
+	  search     : 'f',
 	  user       : 'user'
 	};
 
@@ -271,6 +272,7 @@ var xwitter = function() {
 				  case _cmds.destroy    : _destroy    ( element, status_id ); break;
 				  case _cmds.fav        : _fav        ( element, status_id ); break;
 				  case _cmds.findUrl    : _findUrl    ( element            ); break;
+				  case _cmds.fav_rt     : _fav_rt     ( element, status_id ); break;
 				  case _cmds.quoteTweet : _quoteTweet ( element, status_id ); break;
 				  case _cmds.reply      : _reply      ( element, status_id ); break;
 				  case _cmds.reTweet    : _reTweet    (          status_id ); break;
@@ -383,6 +385,11 @@ var xwitter = function() {
 			  Element[ (favorited ? 'remove' : 'add') + 'ClassName' ](element, className);
 		  }
 		});
+	};
+
+	var _fav_rt = function(element, status_id) {
+		_fav(element, status_id);
+		_reTweet(status_id);
 	};
 
 	var _findUrl = function(element) {

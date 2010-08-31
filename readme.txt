@@ -16,6 +16,7 @@
 
 * コマンド (num はツイート番号)
 	:fav     <num>                ふぁぼる
+	:fnr     <num>                ふぁぼってリツイート
 	:url     <num>                ツイート中の URL を取得 (短縮 URL は展開されます)
 	:@       <num>                返信 (in_reply_to_status_id が付きます)
 	:qt      <num>                引用してツイート (in_reply_to_status_id が付きます)
