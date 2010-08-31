@@ -2,13 +2,13 @@
 <?xml-stylesheet type="text/css" href="chrome://global/skin/"?>
 <?xml-stylesheet type="text/css" href="chrome://xwitter/skin/xwitter.css"?>
 <xul:window title="xwitter"
-  xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+  xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+  xmlns="http://www.w3.org/1999/xhtml">
   <xul:textbox id="status" />
-  <xul:box id="statuses" />
+  <xul:box id="statuses"><html /></xul:box>
   <xul:script type="application/x-javascript" src="chrome://global/content/nsUserSettings.js" />
   <xul:script type="application/x-javascript" src="chrome://xwitter/content/oauth.js" />
   <xul:script type="application/x-javascript" src="chrome://xwitter/content/sha1.js" />
-  <xul:script type="application/x-javascript" src="chrome://xwitter/content/jquery-1.4.2.min.js" />
   <xul:script type="application/x-javascript" src="chrome://xwitter/content/common.js" />
   <xul:script type="application/x-javascript" src="chrome://xwitter/content/xwitter.js" />
   <xul:script type="application/x-javascript">xwitter()</xul:script>
