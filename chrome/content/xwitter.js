@@ -1,4 +1,4 @@
-﻿var xwitter = function() {
+var xwitter = function() {
 	var _limit = 3600 / nsPreferences.getIntPref('xwitter.limit', 350) * 1000;
 
 	var _subname = '';
@@ -51,6 +51,7 @@
 	  user       : 'user'
 	};
 
+	var _matchId  = /^(\d+)\s(\d+)?$/;
 	var _matchUrl = /(https?:\/\/[\-_.!~*\'()\w;\/?:\@&=+\$,%#]+)/g;
 
 	// ================================================================================================================================
@@ -159,9 +160,8 @@
 					  }
 
 					  _transform(df);
-					  var element = _statuses[ _statuses.length - 1 ];
-					  since_id[myKey] = element.title.replace(/\d+$/, '$&');
-					  element = null;
+					  since_id[myKey] = _statuses[ _statuses.length - 1 ].title.replace(
+						  _matchId, function($_, $1, $2) { return $2 || $1; });
 
 					  _box.insertBefore(df, _box.firstChild);
 					  df = null;
@@ -284,7 +284,7 @@
 				}
 
 				var element = _statuses[index];
-				var status_id = element.title.replace(/^\d+/, '$&');
+				var status_id = element.title.replace(_matchId, '$1');
 
 				switch (cmd) {
 				  case _cmds.destroy    : _destroy    ( element, status_id ); break;
