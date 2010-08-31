@@ -20,7 +20,17 @@ xul|box#statuses {
 
 div.meta,
 p {
+  margin-left: 40px;
   width: 420px;
+}
+
+div.meta {
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+p {
+  word-wrap: break-word;
 }
 
 xul|textbox#status,
@@ -42,11 +52,6 @@ h1 {
   font-weight: normal;
   font-size: 100%;
   display: inline;
-}
-
-div.meta {
-  white-space: nowrap;
-  overflow: hidden;
 }
 
 header::before {
@@ -74,11 +79,6 @@ time::before {
 
 time::after {
   content: close-quote;
-}
-
-p {
-  word-wrap: break-word;
-  overflow: hidden;
 }
 
 section.protected p,
