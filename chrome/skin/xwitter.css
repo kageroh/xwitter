@@ -11,8 +11,7 @@
 xul|box#statuses {
   color: #d0d0d0;
   background-color: #00283c;
-  width: 480px;
-  height: 800px;
+  height: 70.5em;
   overflow: auto;
   -moz-user-select: text;
   -moz-box-orient: vertical;
@@ -20,7 +19,7 @@ xul|box#statuses {
 
 div.meta,
 p {
-  width: 420px;
+  width: 24.5em;
 }
 
 xul|textbox#status,
@@ -95,7 +94,7 @@ section.protected p {
 section.retweeted p {
   text-indent: 19px;
   background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAIAQMAAADz31yPAAAABlBMVEXd3d3///+uIkqAAAAAAnRSTlP/AOW3MEoAAAAcSURBVAjXYzjDw9DGw8B8huE8BDEwHGxhOHAGAGDnCRA2Lk32AAAAAElFTkSuQmCC');
-  background-position: 2px 4px;
+  background-position: 2px 3px;
 }
 
 p.favorited {
