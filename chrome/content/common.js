@@ -37,37 +37,90 @@ var xsltproc = function(path) {
 	doc.load(path);
 	var proc = new XSLTProcessor();
 	proc.importStylesheet(doc);
-	doc = null;
 	return proc;
 };
 
-$.ajax = (function() {
-	var _ajax = $.ajax;
+var Ajax = {
+  request: function(options) {
+	  var xhr = new XMLHttpRequest();
+	  xhr.onreadystatechange = function() { try {
+		  if (xhr.readyState !== 4 || xhr.status !== 200) { return; }
+		  if (!options.success) { return; }
 
-	return function(options) {
-		options.error = (function() {
-			var _error = options.error;
+		  var data = xhr.responseText;
+		  switch (options.dataType.toLowerCase()) {
+			case 'xml':
+			  data = xhr.responseXML;
+			  break;
+			case 'json':
+			  data = JSON.parse(data);
+			  break;
+		  }
 
-			return function(xhr, status, e) {
-				xhr = null;
-				_error();
-				dump(e);
-			};
-		})();
+		  options.success(data, options.dataType, xhr);
+	  } catch (e) { dump(e); } };
 
-		return _ajax(options);
-	};
-})();
+	  options.type = options.type.toUpperCase();
+
+	  if (options.data) {
+		  var pairs = [], data = options.data;
+		  for (var prop in data) {
+			  pairs.push([prop, encodeURIComponent(data[prop])].join('='));
+		  }
+		  options.data = pairs.join('&');
+		  if (options.type === 'GET') {
+			  (options.url += '?' + options.data);
+		  }
+	  }
+
+	  if (typeof options.async === 'undefined') {
+		  options.async = true;
+	  }
+
+	  xhr.open(options.type, options.url, options.async);
+	  if (options.type === 'POST') {
+		  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+	  }
+	  xhr.send(options.data || null);
+
+	  return xhr;
+  }
+};
+
+var Element = {
+  hasClassName: function(element, className) {
+	  return (' ' + element.className + ' ').indexOf(' ' + className + ' ') !== -1;
+  },
+
+  addClassName: function(element, className) {
+	  element.className += (element.className ? ' ' : '') + className;
+	  return element;
+  },
+
+  removeClassName: function(element, className) {
+	  var regexp = new RegExp('(?:^|\\s+)' + className + '(?:\\s+|$)');
+	  element.className = element.className.replace(regexp, ' ').trim();
+	  return element;
+  }
+};
 
 var Effects = {
   fadeIn: function(element, ms) {
 	  var opacity = 0, gap = 0.1;
-	  var tid = setInterval(function() { try {
+	  ms = ms * gap;
+	  setTimeout(function() { try {
 		  element.style.opacity = opacity = (opacity + gap < 1) ? opacity + gap : 1;
-		  if (opacity === 1) {
-			  clearInterval(tid);
-			  element = null;
+		  if (opacity < 1) {
+			  setTimeout(arguments.callee, ms);
 		  }
-	  } catch (e) { dump(e); } }, ms * gap);
+	  } catch (e) { dump(e); } }, ms);
   }
+};
+
+var Events = {
+	bind: function(element, type, fn, useCapture) {
+		element.addEventListener(type, function(event) { try {
+			fn.apply(element, [event]);
+		} catch (e) { dump(e); } }, useCapture || false);
+	}
 };
