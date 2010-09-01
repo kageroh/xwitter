@@ -104,10 +104,9 @@
 
 	var _refresh = (function() {
 		var since_id = {};
-		var myXsltproc = xsltproc('chrome://xwitter/content/xwitter.xsl');
-		var atom2stats = xsltproc('chrome://xwitter/content/atom2stats.xsl');
 
 		return function() {
+			dump('hoge');
 			var mode = _mode;
 			var url  = _modeUrl;
 			var key  = url + _subname;
@@ -141,6 +140,10 @@
 			  dataType: 'xml',
 			  success: function(data) {
 				  var xml = data;
+
+				  var myXsltproc = xsltproc('chrome://xwitter/content/xwitter.xsl');
+				  var atom2stats = xsltproc('chrome://xwitter/content/atom2stats.xsl');
+
 				  switch (mode) {
 					case _modes.search:
 					  xml = atom2stats.transformToFragment(xml, document);
@@ -471,7 +474,9 @@
 
 	var _flee = function() {
 		_statuses.length = 0;
+		_box.style.display = 'none';
 		_box.innerHTML = '';
+		_box.style.display = 'block';
 	};
 
 	// ================================================================
