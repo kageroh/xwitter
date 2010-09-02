@@ -104,6 +104,8 @@
 
 	var _refresh = (function() {
 		var since_id = {};
+		var myXsltproc = xsltproc('chrome://xwitter/content/xwitter.xsl');
+		var atom2stats = xsltproc('chrome://xwitter/content/atom2stats.xsl');
 
 		return function() {
 			var mode = _mode;
@@ -139,9 +141,6 @@
 			  dataType: 'xml',
 			  success: function(data) {
 				  var xml = data;
-
-				  var myXsltproc = xsltproc('chrome://xwitter/content/xwitter.xsl');
-				  var atom2stats = xsltproc('chrome://xwitter/content/atom2stats.xsl');
 
 				  switch (mode) {
 					case _modes.search:
