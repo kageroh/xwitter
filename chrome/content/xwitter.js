@@ -106,7 +106,6 @@
 		var since_id = {};
 
 		return function() {
-			dump('hoge');
 			var mode = _mode;
 			var url  = _modeUrl;
 			var key  = url + _subname;
@@ -474,6 +473,7 @@
 
 	var _flee = function() {
 		_statuses.length = 0;
+		_textbox.reset();
 		_box.style.display = 'none';
 		_box.innerHTML = '';
 		_box.style.display = 'block';
