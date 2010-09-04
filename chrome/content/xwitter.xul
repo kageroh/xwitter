@@ -7,6 +7,7 @@
   <xul:textbox id="status" />
   <xul:box id="statuses"><html /></xul:box>
   <xul:script type="application/x-javascript" src="chrome://global/content/nsUserSettings.js" />
+  <xul:script type="application/x-javascript" src="chrome://xwitter/content/XMLHttpRequest.js" />
   <xul:script type="application/x-javascript" src="chrome://xwitter/content/oauth.js" />
   <xul:script type="application/x-javascript" src="chrome://xwitter/content/sha1.js" />
   <xul:script type="application/x-javascript" src="chrome://xwitter/content/common.js" />

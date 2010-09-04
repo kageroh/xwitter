@@ -43,22 +43,10 @@ var xsltproc = function(path) {
 var Ajax = {
   request: function(options) {
 	  var xhr = new XMLHttpRequest();
-	  xhr.onreadystatechange = function() { try {
-		  if (xhr.readyState !== 4 || xhr.status !== 200) { return; }
-		  if (!options.success) { return; }
 
-		  var data = xhr.responseText;
-		  switch (options.dataType.toLowerCase()) {
-			case 'xml':
-			  data = xhr.responseXML;
-			  break;
-			case 'json':
-			  data = JSON.parse(data);
-			  break;
-		  }
-
-		  options.success(data, options.dataType, xhr);
-	  } catch (e) { dump(e); } };
+	  if (typeof options.async === 'undefined') {
+		  options.async = true;
+	  }
 
 	  options.type = options.type.toUpperCase();
 
@@ -73,8 +61,24 @@ var Ajax = {
 		  }
 	  }
 
-	  if (typeof options.async === 'undefined') {
-		  options.async = true;
+	  if (options.success) {
+		  xhr.addEventListener('readystatechange', function(event) { try {
+			  if (xhr.readyState !== XMLHttpRequest.DONE || xhr.status !== 200) { return; }
+			  xhr.removeEventListener(event.type, arguments.callee);
+
+			  var data = xhr.responseText;
+			  switch (options.dataType.toLowerCase()) {
+				case 'xml':
+				  data = xhr.responseXML;
+				  break;
+				case 'json':
+				  data = JSON.parse(data);
+				  break;
+			  }
+
+			  options.success(data, options.dataType, xhr);
+			  xhr = null;
+		  } catch (e) { dump(e); } }, false);
 	  }
 
 	  xhr.open(options.type, options.url, options.async);
