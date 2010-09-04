@@ -51,7 +51,7 @@
 	  user       : 'user'
 	};
 
-	var _matchId  = /^(\d+)\s(\d+)?$/;
+	var _matchId  = /^(\d+) \d+?$/;
 	var _matchUrl = /(https?:\/\/[\-_.!~*\'()\w;\/?:\@&=+\$,%#]+)/g;
 
 	// ================================================================
@@ -152,10 +152,9 @@
 					  return;
 				  }
 
-				  _transform(df);
-				  since_id[key] = _statuses[ _statuses.length - 1 ].title.replace(
-					  _matchId, function($_, $1, $2) { return $2 || $1; });
-				  _box.insertBefore(df, _box.firstChild);
+				  since_id[key] = $s('statuses > status > id', xml).textContent;
+
+				  _box.insertBefore(_transform(df), _box.firstChild);
 				  Effects.fadeIn(_box.firstChild, 500);
 			  }
 			});
@@ -183,6 +182,7 @@
 			var elements = $S(_query.status, df.firstChild);
 			for (var i = elements.length; i--;) {
 				var element = elements[i];
+				_statuses.push(element);
 
 				$s(_query.marker, element).title = _statuses.length.toString(10);
 
@@ -199,9 +199,8 @@
 					         $4 ? '<em class="old-rt">'    + $4 + '</em>' :
 					         '';
 				  }).replace(highlight, '<em class="highlight">$&</em>');
-
-				_statuses.push(element);
 			}
+			return df;
 		};
 	})();
 
