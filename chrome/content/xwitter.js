@@ -163,8 +163,17 @@
 	})();
 
 	var _transform = (function() {
-		var matchAccount = /(@)(\w{1,20})/g;
-		var matchHashTag = /#\w+/g;
+		var matchAccount = /@(\w{1,20})/g;
+		var matchHashTag = /(#\w+)/g;
+		var matchOldRt   = /\b([RQ]T)(?=\s+)/g;
+
+		var matchMix = new RegExp([
+			matchAccount.source,
+			matchHashTag.source,
+			_matchUrl.source,
+			matchOldRt.source
+			].join('|'), 'g');
+
 		var highlight = (function() {
 			var str = nsPreferences.copyUnicharPref('xwitter.highlight', '');
 			return str ? new RegExp(str.replace(/\W/g, '\\$&'), 'g') : null;
@@ -183,10 +192,13 @@
 				var text = $s(_query.text, element);
 				text.textContent = _refChar(text.textContent);
 				text.innerHTML = text.innerHTML.
-				  replace(matchAccount, '$1<em class="account">$2</em>').
-					replace(matchHashTag, '<em class="hash-tag">$&</em>').
-					  replace(_matchUrl, '<em class="url">$1</em>').
-						replace(highlight, '<em class="highlight">$&</em>');
+				  replace(matchMix, function($_, $1, $2, $3, $4) {
+					  return $1 ? '@<em class="account">'  + $1 + '</em>' :
+					         $2 ? '<em class="hash-tag">'  + $2 + '</em>' :
+					         $3 ? '<em class="url">'       + $3 + '</em>' :
+					         $4 ? '<em class="old-rt">'    + $4 + '</em>' :
+					         '';
+				  }).replace(highlight, '<em class="highlight">$&</em>');
 
 				_statuses.push(element);
 			}

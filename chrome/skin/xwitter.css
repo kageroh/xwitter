@@ -128,6 +128,10 @@ em.highlight {
   background-color: #eedd82;
 }
 
+em.old-rt {
+  color: lime;
+}
+
 em.source {
   color: #87cefa;
   quotes: '<' '>';
