@@ -77,7 +77,6 @@ var Ajax = {
 			  }
 
 			  options.success(data, options.dataType, xhr);
-			  xhr = null;
 		  } catch (e) { dump(e); } }, false);
 	  }
 

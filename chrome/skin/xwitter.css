@@ -43,7 +43,6 @@ body:first-child {
   border-width: 0 0 1px;
   border-color: fuchsia;
   border-style: solid;
-  opacity: 0;
 }
 
 h1 {
@@ -65,6 +64,7 @@ section {
   margin: .5em auto;
   display: block;
   clear: both;
+  opacity: 0;
 }
 
 time {

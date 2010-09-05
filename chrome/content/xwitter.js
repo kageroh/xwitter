@@ -150,7 +150,6 @@
 				  if (!status) { return; }
 				  since_id[key] = $s('id', status).textContent;
 				  _box.insertBefore(_transform(myXsltproc.transformToFragment(xml, document)), _box.firstChild);
-				  Effects.fadeIn(_box.firstChild, 500);
 			  }
 			});
 		};
@@ -161,12 +160,12 @@
 		var matchHashTag = /(#\w+)/g;
 		var matchOldRt   = /\b([RQ]T)(?=\s+)/g;
 
-		var matchMix = new RegExp([
+		var mixedExpr = [
 			matchAccount.source,
 			matchHashTag.source,
 			_matchUrl.source,
 			matchOldRt.source
-			].join('|'), 'g');
+			].join('|');
 
 		var highlight = (function() {
 			var str = nsPreferences.copyUnicharPref('xwitter.highlight', '');
@@ -185,14 +184,19 @@
 
 				var text = $s(_query.text, element);
 				text.textContent = _refChar(text.textContent);
-				text.innerHTML = text.innerHTML.
-				  replace(matchMix, function($_, $1, $2, $3, $4) {
-					  return $1 ? '@<em class="account">'  + $1 + '</em>' :
-					         $2 ? '<em class="hash-tag">'  + $2 + '</em>' :
-					         $3 ? '<em class="url">'       + $3 + '</em>' :
-					         $4 ? '<em class="old-rt">'    + $4 + '</em>' :
-					         '';
-				  }).replace(highlight, '<em class="highlight">$&</em>');
+
+				var worker = new Worker('replace.js');
+				worker.addEventListener('message', (function() {
+					var myWorker = worker;
+					var myElement = element;
+					var myText = text;
+					return function(event) {
+						myWorker.removeEventListener(event.type, arguments.callee, false);
+						myText.innerHTML = event.data.replace(highlight, '<em class="highlight">$&</em>');
+						Effects.fadeIn(myElement, 500);
+					};
+				})(), false);
+				worker.postMessage({ html: text.innerHTML, expr: mixedExpr });
 			}
 			return df;
 		};
@@ -552,8 +556,8 @@
 
 	var _init = function() {
 		(function() {
-			setTimeout(arguments.callee, _limit);
 			_refresh();
+			setTimeout(arguments.callee, _limit);
 		})();
 	};
 
