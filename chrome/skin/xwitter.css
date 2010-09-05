@@ -5,7 +5,7 @@
 * {
   margin: 0;
   padding: 0;
-  -moz-box-sizing: padding-box;
+  -moz-box-sizing: border-box;
 }
 
 xul|box#statuses {
