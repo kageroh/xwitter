@@ -93,7 +93,7 @@
 				break;
 			  case _modes.search:
 				_q = param;
-				_subname = 'search: ' + param;
+				_subname = '/' + param;
 				_modeUrl = 'https://search.twitter.com/search.atom';
 				break;
 			}
@@ -141,20 +141,15 @@
 			  dataType: 'xml',
 			  success: function(data) {
 				  var xml = data;
-
 				  switch (mode) {
 					case _modes.search:
 					  xml = atom2stats.transformToFragment(xml, document);
 					  break;
 				  }
-				  var df = myXsltproc.transformToFragment(xml, document);
-				  if (!(df.firstChild instanceof HTMLBodyElement)) {
-					  return;
-				  }
-
-				  since_id[key] = $s('statuses > status > id', xml).textContent;
-
-				  _box.insertBefore(_transform(df), _box.firstChild);
+				  var status = $s('statuses > status', xml);
+				  if (!status) { return; }
+				  since_id[key] = $s('id', status).textContent;
+				  _box.insertBefore(_transform(myXsltproc.transformToFragment(xml, document)), _box.firstChild);
 				  Effects.fadeIn(_box.firstChild, 500);
 			  }
 			});
@@ -182,9 +177,8 @@
 			var elements = $S(_query.status, df.firstChild);
 			for (var i = elements.length; i--;) {
 				var element = elements[i];
-				_statuses.push(element);
-
 				$s(_query.marker, element).title = _statuses.length.toString(10);
+				_statuses.push(element);
 
 				var created_at = $s(_query.created_at, element);
 				created_at.textContent = _dateParse(created_at.textContent);
