@@ -510,6 +510,7 @@
 		switch (event.keyCode) {
 		  case KeyEvent.DOM_VK_RETURN:
 		  case KeyEvent.DOM_VK_ENTER:
+			if (!event.ctrlKey) { return; }
 			var value = _textbox.value;
 			_textbox.value = '';
 			_update(value);
