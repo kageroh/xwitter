@@ -186,7 +186,7 @@
 				text.textContent = _refChar(text.textContent);
 
 				var worker = new Worker('replace.js');
-				worker.addEventListener('message', (function() {
+				worker.addEventListener('message', (function() { try {
 					var myWorker = worker;
 					var myElement = element;
 					var myText = text;
@@ -195,7 +195,7 @@
 						myText.innerHTML = event.data.replace(highlight, '<em class="highlight">$&</em>');
 						Effects.fadeIn(myElement, 500);
 					};
-				})(), false);
+				} catch (e) { dump(e); } })(), false);
 				worker.postMessage({ html: text.innerHTML, expr: mixedExpr });
 			}
 			return df;
