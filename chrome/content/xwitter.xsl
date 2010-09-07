@@ -56,7 +56,6 @@
 		</header>
 		<footer>
 		  <time><xsl:value-of select="$cur/created_at" /></time>
-		  <xsl:text>via </xsl:text>
 		  <em class="source">
 			<xsl:value-of select="regexp:replace($cur/source, '^&lt;a [^&gt;]+&gt;(.+)&lt;/a&gt;$', '', '$1')" />
 		  </em>
