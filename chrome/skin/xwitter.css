@@ -134,7 +134,7 @@ em.old-rt {
 
 em.source {
   color: #87cefa;
-  quotes: '<' '>';
+  quotes: '{' '}';
 }
 
 em.source::before {
