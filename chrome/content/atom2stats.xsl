@@ -21,7 +21,7 @@
   <xsl:template match="atom:entry">
 	<status>
 	  <id><xsl:value-of select="regexp:replace(atom:id, '^tag:search.twitter.com,2005:(\d+)$', '', '$1')" /></id>
-	  <created_at><xsl:value-of select="regexp:replace(atom:published, '^(\d+)-(\d+)-(\d+)T([:\d]+)Z$', '', 'N/A $2 $3 $4 +0000 $1')" /></created_at>
+	  <created_at><xsl:value-of select="atom:published" /></created_at>
 	  <source><xsl:value-of select="twitter:source" /></source>
 	  <text><xsl:value-of select="atom:title" /></text>
 	  <user>

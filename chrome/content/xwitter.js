@@ -180,7 +180,7 @@
 				_statuses.push(element);
 
 				var created_at = $s(_query.created_at, element);
-				created_at.textContent = _dateParse(created_at.textContent);
+				created_at.textContent = new Date(created_at.textContent).toLocaleTimeString();
 
 				var text = $s(_query.text, element);
 				text.textContent = _refChar(text.textContent);
@@ -199,35 +199,6 @@
 				worker.postMessage({ html: text.innerHTML, expr: mixedExpr });
 			}
 			return df;
-		};
-	})();
-
-	var _dateParse = (function() {
-		var timeOffset = (function() {
-			var str = nsPreferences.copyUnicharPref('xwitter.timeOffset', '');
-			var match = /^([+\-])(\d{2}):(\d{2})$/.exec(str) || [];
-
-			if (match[1] && match[2] && match[3]) {
-				var sign = match[1];
-				var time = (parseInt(match[2], 10) + parseInt(match[3], 10) / 60) * 3600;
-
-				switch (sign) {
-				  case '+' : time = +time; break;
-				  case '-' : time = -time; break;
-				}
-			}
-			return time;
-		})() || 0;
-
-		return function(created_at) {
-			var arr = created_at.split(/\s/);
-			var date = new Date([arr[1], arr[2] + ',', arr[5], arr[3]].join(' '));
-
-			date.setSeconds(date.getSeconds() + timeOffset);
-
-			var h = date.getHours().zerofill(2);
-			var m = date.getMinutes().zerofill(2);
-			return isNaN(h) || isNaN(m) ? 'N/A' : [ h, m ].join(':');
 		};
 	})();
 
