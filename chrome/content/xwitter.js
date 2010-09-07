@@ -167,10 +167,7 @@
 			matchOldRt.source
 			].join('|');
 
-		var highlight = (function() {
-			var str = nsPreferences.copyUnicharPref('xwitter.highlight', '');
-			return str ? new RegExp(str.replace(/\W/g, '\\$&'), 'g') : null;
-		})();
+		var highlight = nsPreferences.copyUnicharPref('xwitter.highlight', '');
 
 		return function(df) {
 			var elements = $S(_query.status, df.firstChild);
@@ -192,11 +189,15 @@
 					var myText = text;
 					return function(event) {
 						myWorker.removeEventListener(event.type, arguments.callee, false);
-						myText.innerHTML = event.data.replace(highlight, '<em class="highlight">$&</em>');
+						myText.innerHTML = event.data;
 						Effects.fadeIn(myElement, 500);
 					};
 				} catch (e) { dump(e); } })(), false);
-				worker.postMessage({ html: text.innerHTML, expr: mixedExpr });
+				worker.postMessage({
+				  html : text.innerHTML,
+				  expr : mixedExpr,
+				  high : highlight
+				});
 			}
 			return df;
 		};
