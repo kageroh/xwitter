@@ -109,7 +109,7 @@ var Element = {
 
 var Effects = {
   fadeIn: function(element, ms) {
-	  var opacity = 0, gap = 0.1;
+	  var opacity = 0, gap = 1 / 8;
 	  ms = ms * gap;
 	  setTimeout(function() { try {
 		  element.style.opacity = opacity = (opacity + gap < 1) ? opacity + gap : 1;
