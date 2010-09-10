@@ -1,4 +1,5 @@
 ﻿var xwitter = function() {
+	var _max_len = 140;
 	var _limit = 3600 / nsPreferences.getIntPref('xwitter.limit', 350) * 1000;
 
 	var _subname = '';
@@ -22,7 +23,7 @@
 	var _in_reply = '';
 	var _q;
 
-	var _box = $s('#statuses > html');
+	var _box     = $s('#statuses > html');
 	var _textbox = $s('#status');
 
 	var _query = {
@@ -300,10 +301,11 @@
 			return;
 		}
 
-		value += _footer;
-		if (value.length > 140) {
-			value = _shortenUrl(value);
-			if (value.length > 140) {
+		var tmp_val = value + _footer;
+		if (tmp_val.length > _max_len) {
+			tmp_val = _shortenUrl(value) + _footer;
+			if (tmp_val.length > _max_len) {
+				_textbox.value = value;
 				_textbox.select();
 				return;
 			}
