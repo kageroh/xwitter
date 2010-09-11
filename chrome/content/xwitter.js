@@ -127,6 +127,9 @@
 				  case _modes.user:
 					data.count = '200';
 					break;
+				  case _modes.search:
+					data.rpp   = '100';
+					break;
 				}
 			}
 
