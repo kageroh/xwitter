@@ -310,6 +310,7 @@
 				return;
 			}
 		}
+		value = tmp_val;
 
 		var data = {
 		  status : value
