@@ -5,7 +5,7 @@
   xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
   xmlns="http://www.w3.org/1999/xhtml">
   <xul:textbox id="status" />
-  <xul:box id="statuses"><html /></xul:box>
+  <xul:box class="statuses"><html /></xul:box>
   <xul:script type="application/x-javascript" src="chrome://global/content/nsUserSettings.js" />
   <xul:script type="application/x-javascript" src="chrome://xwitter/content/XMLHttpRequest.js" />
   <xul:script type="application/x-javascript" src="chrome://xwitter/content/oauth.js" />

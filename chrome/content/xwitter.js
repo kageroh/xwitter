@@ -23,7 +23,8 @@
 	var _in_reply = '';
 	var _q;
 
-	var _box     = $s('#statuses > html');
+	var _box     = $s('.statuses > html');
+	var _box_    = _box.cloneNode(true);
 	var _textbox = $s('#status');
 
 	var _query = {
@@ -161,7 +162,7 @@
 
 	var _transform = (function() {
 		var matchAccount = /@(\w{1,20})/g;
-		var matchHashTag = /(#\w+)/g;
+		var matchHashTag = /(#(?:\d+[a-zA-Z]\w*|[a-zA-Z]\w*))/g;
 		var matchOldRt   = /\b([RQ]T)(?=\s+)/g;
 
 		var mixedExpr = [
@@ -188,13 +189,16 @@
 
 				var worker = new Worker('replace.js');
 				worker.addEventListener('message', (function() { try {
+					var myI = i;
 					var myWorker = worker;
 					var myElement = element;
 					var myText = text;
 					return function(event) {
 						myWorker.removeEventListener(event.type, arguments.callee, false);
 						myText.innerHTML = event.data;
-						Effects.fadeIn(myElement, 500);
+						if (myI === 0) {
+							Effects.fadeIn(myElement.parentNode, 500);
+						}
 					};
 				} catch (e) { dump(e); } })(), false);
 				worker.postMessage({
@@ -460,9 +464,10 @@
 	var _flee = function() {
 		_statuses.length = 0;
 		_textbox.reset();
-		_box.style.display = 'none';
-		_box.innerHTML = '';
-		_box.style.display = 'block';
+		var box = _box;
+		_box = _box_;
+		_box_ = _box_.cloneNode(true);
+		box.parentNode.replaceChild(_box, box);
 	};
 
 	// ================================================================

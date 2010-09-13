@@ -8,7 +8,7 @@
   -moz-box-sizing: border-box;
 }
 
-xul|box#statuses {
+xul|box.statuses {
   color: #d0d0d0;
   background-color: #00283c;
   width: 480px;
@@ -43,6 +43,7 @@ body:first-child {
   border-width: 0 0 1px;
   border-color: fuchsia;
   border-style: solid;
+  opacity: 0;
 }
 
 h1 {
@@ -64,7 +65,6 @@ section {
   margin: .5em auto;
   display: block;
   clear: both;
-  opacity: 0;
 }
 
 time {
