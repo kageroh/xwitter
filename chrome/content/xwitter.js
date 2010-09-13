@@ -162,7 +162,7 @@
 
 	var _transform = (function() {
 		var matchAccount = /@(\w{1,20})/g;
-		var matchHashTag = /(#(?:\d+[a-zA-Z]\w*|[_a-zA-Z]\w*))/g;
+		var matchHashTag = /(#(?:\d+[_a-zA-Z]\w*|[_a-zA-Z]\w*))/g;
 		var matchOldRt   = /\b([RQ]T)(?=\s+)/g;
 
 		var mixedExpr = [
