@@ -23,7 +23,7 @@
 	var _in_reply = '';
 	var _q;
 
-	var _box     = $s('.statuses > html');
+	var _box     = $s('#statuses > html');
 	var _box_    = _box.cloneNode(true);
 	var _textbox = $s('#status');
 

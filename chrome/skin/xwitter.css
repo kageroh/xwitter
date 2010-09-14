@@ -8,7 +8,7 @@
   -moz-box-sizing: border-box;
 }
 
-xul|box.statuses {
+xul|box#statuses {
   color: #d0d0d0;
   background-color: #00283c;
   width: 480px;
