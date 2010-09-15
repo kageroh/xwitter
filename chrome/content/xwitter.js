@@ -24,7 +24,7 @@
 	var _q;
 
 	var _box     = $s('#statuses > html');
-	var _box_    = _box.cloneNode(true);
+	var _box_    = _box.cloneNode(false);
 	var _textbox = $s('#status');
 
 	var _query = {
@@ -466,7 +466,7 @@
 		_textbox.reset();
 		var box = _box;
 		_box = _box_;
-		_box_ = _box_.cloneNode(true);
+		_box_ = _box_.cloneNode(false);
 		box.parentNode.replaceChild(_box, box);
 	};
 
