@@ -3,7 +3,7 @@
 
 * 起動
 ** Windows
-	C:\Program Files\Mozilla Firefox\firefox.exe -app application.ini
+	"C:\Program Files\Mozilla Firefox\firefox.exe" -app application.ini
 ** Mac OS
 	/Applications/Firefox.app/Contents/MacOS/firefox-bin -app application.ini
 
