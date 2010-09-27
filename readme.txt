@@ -4,8 +4,6 @@
 * 起動
 ** Windows
 	<firefox.exe> -app application.ini
-** Linux
-	xulrunner application.ini
 
 * 使い方
 	念力で把握してください ＞＜ (嘘)
