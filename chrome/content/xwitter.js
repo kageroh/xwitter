@@ -182,7 +182,7 @@
 				_statuses.push(element);
 
 				var created_at = $s(_query.created_at, element);
-				created_at.textContent = new Date(created_at.textContent).toLocaleTimeString();
+				created_at.textContent = new Date(created_at.textContent).toLocaleFormat('%H:%M:%S');
 
 				var text = $s(_query.text, element);
 				text.textContent = _refChar(text.textContent);
