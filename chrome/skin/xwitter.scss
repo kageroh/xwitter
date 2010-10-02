@@ -1,0 +1,164 @@
+@charset 'utf-8';
+@namespace url('http://www.w3.org/1999/xhtml');
+@namespace xul url('http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul');
+
+@import 'common';
+
+$img_size: 24px;
+
+* {
+  line-height: 1.5;
+}
+
+xul|box#statuses {
+  color: #d0d0d0;
+  background-color: #00283c;
+  width: 480px;
+  height: 800px;
+  overflow: auto;
+  -moz-user-select: text;
+  -moz-box-orient: vertical;
+}
+
+div.meta,
+p {
+  margin-left: 40px;
+  width: 420px;
+}
+
+div.meta {
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+p {
+  word-wrap: break-word;
+}
+
+xul|textbox#status,
+body {
+  font-family: 'M+2VM+IPAG circle Regular', sans-serif;
+  font-size: 13px;
+}
+
+body:first-child {
+  border-width: 0 0 1px;
+  border-color: fuchsia;
+  border-style: solid;
+  opacity: 0;
+}
+
+h1 {
+  text-shadow: 1px 1px 2px black, 0 0 1em green, 0 0 .2em green;
+  color: #98fb98;
+  font-weight: normal;
+  font-size: 100%;
+  display: inline;
+}
+
+header::before {
+  text-align: right;
+  margin-right: .5em;
+  display: inline-block;
+  content: '['attr(title)']';
+}
+
+section {
+  margin: .5em auto;
+  display: block;
+  clear: both;
+}
+
+time {
+  color: #eedd82;
+  margin: auto .5em;
+  quotes: '(' ')';
+
+  &::before {
+	content: open-quote;
+  }
+
+  &::after {
+	content: close-quote;
+  }
+}
+
+section {
+  &.protected p,
+  &.retweeted p {
+	 background-repeat: no-repeat;
+  }
+
+  &.protected p {
+	text-indent: 13px;
+	background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAKCAYAAACJxx+AAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAABx0RVh0U29mdHdhcmUAQWRvYmUgRmlyZXdvcmtzIENTNAay06AAAAAVdEVYdENyZWF0aW9uIFRpbWUAOS8yMi8wOSXiRNYAAABzSURBVBiVrcqxDQFhGIDh57sodBJjiO6/UsQINlDbyk3gVhCl7wYQU5jgV7hEw1Xe9nmj1moYhgV67FBxwb6U8my86zHHGhsscYbZOGyxatv2Dpl5xBWaiBgfD59uEBEiM084+F4XmVl/IGim8H9DN+HdC0E/G7TuwOriAAAAAElFTkSuQmCC');
+	background-position: 2px 2px;
+  }
+
+  &.retweeted p {
+	text-indent: 19px;
+	background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAIAQMAAADz31yPAAAABlBMVEXd3d3///+uIkqAAAAAAnRSTlP/AOW3MEoAAAAcSURBVAjXYzjDw9DGw8B8huE8BDEwHGxhOHAGAGDnCRA2Lk32AAAAAElFTkSuQmCC');
+	background-position: 2px 3px;
+  }
+}
+
+p.favorited {
+  color: #ffa07a;
+  quotes: '"' '"';
+
+  &::before {
+	content: open-quote;
+  }
+
+  &::after {
+	content: close-quote;
+  }
+}
+
+em {
+  font-style: normal;
+
+  &.account {
+	color: aqua;
+  }
+
+  &.hash-tag {
+	color: #ff4500;
+  }
+
+  &.highlight {
+	color: #00283c;
+	background-color: #eedd82;
+  }
+
+  &.old-rt {
+	color: lime;
+  }
+
+  &.source {
+	color: #87cefa;
+	quotes: '{' '}';
+
+	&.source::before {
+	  content: open-quote;
+	}
+
+	&.source::after {
+	  content: close-quote;
+	}
+  }
+
+  &.url {
+	text-decoration: underline;
+	color: #39f;
+  }
+}
+
+img {
+  margin: auto 6px;
+  border: 1px silver solid;
+  @include float(left, $img_size);
+  height: $img_size;
+  @include border-radius(2px);
+  @include box-shadow(black 4px 4px 4px);
+}
